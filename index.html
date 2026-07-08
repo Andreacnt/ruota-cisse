@@ -182,6 +182,8 @@ canvas#fireworks {
   align-items: center;
   width: 80px;
   flex-shrink: 0;
+  z-index: 300;
+  position: relative;
 }
 .testa {
   width: 40px; height: 40px;
@@ -221,18 +223,26 @@ canvas#fireworks {
 }
 .braccio.sx { left: -14px; transform: rotate(15deg); }
 .braccio.dx { right: -14px; transform: rotate(-15deg); }
-.braccio.alza { animation: alzaBraccia 1.2s ease-in-out; }
-@keyframes alzaBraccia {
-  0% { transform: rotate(var(--start)); }
-  35% { transform: rotate(-160deg); }
-  55% { transform: rotate(-175deg); }
-  65% { transform: rotate(10deg); }
-  75% { transform: rotate(-5deg); }
-  85% { transform: rotate(5deg); }
-  100% { transform: rotate(var(--start)); }
+.braccio.sx.alza { animation: alzaSx 1.2s ease-in-out; }
+.braccio.dx.alza { animation: alzaDx 1.2s ease-in-out; }
+@keyframes alzaSx {
+  0% { transform: rotate(15deg); }
+  30% { transform: rotate(-160deg); }
+  50% { transform: rotate(-175deg); }
+  62% { transform: rotate(10deg); }
+  72% { transform: rotate(-5deg); }
+  82% { transform: rotate(5deg); }
+  100% { transform: rotate(15deg); }
 }
-.braccio.sx { --start: 15deg; }
-.braccio.dx { --start: -15deg; }
+@keyframes alzaDx {
+  0% { transform: rotate(-15deg); }
+  30% { transform: rotate(160deg); }
+  50% { transform: rotate(175deg); }
+  62% { transform: rotate(-10deg); }
+  72% { transform: rotate(5deg); }
+  82% { transform: rotate(-5deg); }
+  100% { transform: rotate(-15deg); }
+}
 .gambe {
   display: flex;
   gap: 4px;
