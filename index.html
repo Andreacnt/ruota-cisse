@@ -175,86 +175,7 @@ canvas#fireworks {
 }
 .modal-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 #a02828; }
 
-/* OMINO */
-.omino {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 80px;
-  flex-shrink: 0;
-  z-index: 300;
-  position: relative;
-}
-.testa {
-  width: 40px; height: 40px;
-  background: #fdb99b;
-  border-radius: 50%;
-  border: 3px solid #a0522d;
-  position: relative;
-  z-index: 2;
-}
-.testa::after {
-  content: '';
-  position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
-  width: 6px; height: 6px; background: #2d3436; border-radius: 50%;
-  box-shadow: 12px 0 0 #2d3436;
-}
-.testa::before {
-  content: '';
-  position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%);
-  width: 16px; height: 5px; background: #a0522d; border-radius: 0 0 8px 8px;
-}
-.corpo {
-  width: 36px; height: 45px;
-  background: #e74c3c;
-  border-radius: 4px 4px 0 0;
-  margin-top: -5px;
-  position: relative;
-  border: 2px solid #c0392b;
-}
-.braccio {
-  position: absolute;
-  width: 8px; height: 48px;
-  background: #fdb99b;
-  border-radius: 4px;
-  border: 2px solid #a0522d;
-  top: 3px;
-  transform-origin: top center;
-}
-.braccio.sx { left: -14px; transform: rotate(0deg); }
-.braccio.dx { right: -14px; transform: rotate(0deg); }
-.braccio.sx.alza { animation: alzaSx 1.8s ease-in-out; }
-.braccio.dx.alza { animation: alzaDx 1.8s ease-in-out; }
-@keyframes alzaSx {
-  0% { transform: rotate(0deg); }
-  30% { transform: rotate(-90deg); }
-  50% { transform: rotate(-90deg); }
-  65% { transform: rotate(15deg); }
-  78% { transform: rotate(-3deg); }
-  90% { transform: rotate(5deg); }
-  100% { transform: rotate(0deg); }
-}
-@keyframes alzaDx {
-  0% { transform: rotate(0deg); }
-  30% { transform: rotate(90deg); }
-  50% { transform: rotate(90deg); }
-  65% { transform: rotate(-15deg); }
-  78% { transform: rotate(3deg); }
-  90% { transform: rotate(-5deg); }
-  100% { transform: rotate(0deg); }
-}
-.gambe {
-  display: flex;
-  gap: 4px;
-  margin-top: -2px;
-}
-.gamba {
-  width: 10px; height: 30px;
-  background: #2d3436;
-  border-radius: 0 0 4px 4px;
-}
-.gamba.sx { transform: rotate(5deg); }
-.gamba.dx { transform: rotate(-5deg); }
+
 
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes popIn { from { transform: scale(0.3); opacity: 0; } to { transform: scale(1); opacity: 1; } }
@@ -277,18 +198,6 @@ canvas#fireworks {
 <div class="wheel-container">
   <div class="pointer"></div>
   <canvas id="wheel" width="420" height="420"></canvas>
-</div>
-
-<div class="omino" id="omino">
-  <div class="testa"></div>
-  <div class="corpo">
-    <div class="braccio sx" id="braccioSx"></div>
-    <div class="braccio dx" id="braccioDx"></div>
-  </div>
-  <div class="gambe">
-    <div class="gamba sx"></div>
-    <div class="gamba dx"></div>
-  </div>
 </div>
 
 </div>
@@ -413,14 +322,6 @@ function mostraRisultato(indice) {
   box.classList.add('highlight');
   document.getElementById('modalFrase').textContent = frasi[indice];
   document.getElementById('modalOverlay').classList.add('show');
-
-  const sx = document.getElementById('braccioSx');
-  const dx = document.getElementById('braccioDx');
-  sx.classList.remove('alza');
-  dx.classList.remove('alza');
-  void sx.offsetWidth;
-  sx.classList.add('alza');
-  dx.classList.add('alza');
 
   avviaFuochi();
 }
