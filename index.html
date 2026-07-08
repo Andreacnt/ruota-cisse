@@ -18,6 +18,13 @@ body {
   padding: 20px;
   overflow-x: hidden;
 }
+.game-area {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
 h1 {
   font-family: 'Luckiest Guy', cursive;
   font-size: 2.8rem;
@@ -167,6 +174,78 @@ canvas#fireworks {
   transition: all 0.08s linear;
 }
 .modal-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 #a02828; }
+
+/* OMINO */
+.omino {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 80px;
+  flex-shrink: 0;
+}
+.testa {
+  width: 40px; height: 40px;
+  background: #fdb99b;
+  border-radius: 50%;
+  border: 3px solid #a0522d;
+  position: relative;
+  z-index: 2;
+}
+.testa::after {
+  content: '';
+  position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+  width: 6px; height: 6px; background: #2d3436; border-radius: 50%;
+  box-shadow: 12px 0 0 #2d3436;
+}
+.testa::before {
+  content: '';
+  position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%);
+  width: 16px; height: 5px; background: #a0522d; border-radius: 0 0 8px 8px;
+}
+.corpo {
+  width: 36px; height: 45px;
+  background: #e74c3c;
+  border-radius: 4px 4px 0 0;
+  margin-top: -5px;
+  position: relative;
+  border: 2px solid #c0392b;
+}
+.braccio {
+  position: absolute;
+  width: 8px; height: 35px;
+  background: #fdb99b;
+  border-radius: 4px;
+  border: 2px solid #a0522d;
+  top: 3px;
+  transform-origin: top center;
+}
+.braccio.sx { left: -14px; transform: rotate(15deg); }
+.braccio.dx { right: -14px; transform: rotate(-15deg); }
+.braccio.alza { animation: alzaBraccia 1.2s ease-in-out; }
+@keyframes alzaBraccia {
+  0% { transform: rotate(var(--start)); }
+  35% { transform: rotate(-160deg); }
+  55% { transform: rotate(-175deg); }
+  65% { transform: rotate(10deg); }
+  75% { transform: rotate(-5deg); }
+  85% { transform: rotate(5deg); }
+  100% { transform: rotate(var(--start)); }
+}
+.braccio.sx { --start: 15deg; }
+.braccio.dx { --start: -15deg; }
+.gambe {
+  display: flex;
+  gap: 4px;
+  margin-top: -2px;
+}
+.gamba {
+  width: 10px; height: 30px;
+  background: #2d3436;
+  border-radius: 0 0 4px 4px;
+}
+.gamba.sx { transform: rotate(5deg); }
+.gamba.dx { transform: rotate(-5deg); }
+
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes popIn { from { transform: scale(0.3); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
@@ -183,9 +262,25 @@ canvas#fireworks {
 <h1>Cosa farà Cissè oggi al lavoro?</h1>
 <p class="subtitle">⚡ La ruota del destino lavorativo ⚡</p>
 
+<div class="game-area">
+
 <div class="wheel-container">
   <div class="pointer"></div>
   <canvas id="wheel" width="420" height="420"></canvas>
+</div>
+
+<div class="omino" id="omino">
+  <div class="testa"></div>
+  <div class="corpo">
+    <div class="braccio sx" id="braccioSx"></div>
+    <div class="braccio dx" id="braccioDx"></div>
+  </div>
+  <div class="gambe">
+    <div class="gamba sx"></div>
+    <div class="gamba dx"></div>
+  </div>
+</div>
+
 </div>
 
 <button class="btn-spin" id="spinBtn">🎡 GIRA LA RUOTA!</button>
@@ -308,6 +403,15 @@ function mostraRisultato(indice) {
   box.classList.add('highlight');
   document.getElementById('modalFrase').textContent = frasi[indice];
   document.getElementById('modalOverlay').classList.add('show');
+
+  const sx = document.getElementById('braccioSx');
+  const dx = document.getElementById('braccioDx');
+  sx.classList.remove('alza');
+  dx.classList.remove('alza');
+  void sx.offsetWidth;
+  sx.classList.add('alza');
+  dx.classList.add('alza');
+
   avviaFuochi();
 }
 
