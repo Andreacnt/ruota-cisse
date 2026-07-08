@@ -214,7 +214,7 @@ canvas#fireworks {
 }
 .braccio {
   position: absolute;
-  width: 8px; height: 35px;
+  width: 8px; height: 48px;
   background: #fdb99b;
   border-radius: 4px;
   border: 2px solid #a0522d;
@@ -223,24 +223,24 @@ canvas#fireworks {
 }
 .braccio.sx { left: -14px; transform: rotate(20deg); }
 .braccio.dx { right: -14px; transform: rotate(-20deg); }
-.braccio.sx.alza { animation: alzaSx 1.5s ease-in-out; }
-.braccio.dx.alza { animation: alzaDx 1.5s ease-in-out; }
+.braccio.sx.alza { animation: alzaSx 1.8s ease-in-out; }
+.braccio.dx.alza { animation: alzaDx 1.8s ease-in-out; }
 @keyframes alzaSx {
   0% { transform: rotate(20deg); }
-  25% { transform: rotate(-70deg); }
-  45% { transform: rotate(-70deg); }
-  60% { transform: rotate(15deg); }
-  75% { transform: rotate(-5deg); }
-  90% { transform: rotate(8deg); }
+  30% { transform: rotate(-90deg); }
+  50% { transform: rotate(-90deg); }
+  65% { transform: rotate(15deg); }
+  78% { transform: rotate(-3deg); }
+  90% { transform: rotate(5deg); }
   100% { transform: rotate(20deg); }
 }
 @keyframes alzaDx {
   0% { transform: rotate(-20deg); }
-  25% { transform: rotate(70deg); }
-  45% { transform: rotate(70deg); }
-  60% { transform: rotate(-15deg); }
-  75% { transform: rotate(5deg); }
-  90% { transform: rotate(-8deg); }
+  30% { transform: rotate(90deg); }
+  50% { transform: rotate(90deg); }
+  65% { transform: rotate(-15deg); }
+  78% { transform: rotate(3deg); }
+  90% { transform: rotate(-5deg); }
   100% { transform: rotate(-20deg); }
 }
 .gambe {
