@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cosa farà Cissè oggi al lavoro?</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Luckiest+Guy&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: linear-gradient(135deg, #ffecd2, #fcb69f);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Fredoka One', cursive;
+  padding: 20px;
+  overflow-x: hidden;
+}
+h1 {
+  font-family: 'Luckiest Guy', cursive;
+  font-size: 2.8rem;
+  color: #d63031;
+  text-shadow: 3px 3px 0 #fdcb6e, 6px 6px 0 #e17055;
+  text-align: center;
+  margin-bottom: 10px;
+  letter-spacing: 2px;
+}
+.subtitle {
+  font-size: 1.1rem;
+  color: #6c3a1e;
+  margin-bottom: 25px;
+  opacity: 0.8;
+}
+.wheel-container {
+  position: relative;
+  width: 420px;
+  height: 420px;
+}
+canvas#wheel {
+  width: 420px;
+  height: 420px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 8px #fff, 0 0 0 12px #d63031, 0 8px 30px rgba(0,0,0,0.3);
+}
+.pointer {
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 22px solid transparent;
+  border-right: 22px solid transparent;
+  border-top: 40px solid #d63031;
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+  z-index: 10;
+}
+.pointer::after {
+  content: '';
+  position: absolute;
+  top: -42px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16px;
+  height: 16px;
+  background: #d63031;
+  border-radius: 50%;
+  border: 3px solid #fff;
+}
+.btn-spin {
+  margin-top: 30px;
+  font-family: 'Luckiest Guy', cursive;
+  font-size: 1.8rem;
+  padding: 14px 50px;
+  background: linear-gradient(135deg, #d63031, #e17055);
+  color: #fff;
+  border: none;
+  border-radius: 60px;
+  cursor: pointer;
+  box-shadow: 0 6px 0 #a02828, 0 8px 20px rgba(0,0,0,0.2);
+  transition: all 0.08s linear;
+  letter-spacing: 1px;
+}
+.btn-spin:active {
+  transform: translateY(6px);
+  box-shadow: 0 2px 0 #a02828, 0 4px 12px rgba(0,0,0,0.2);
+}
+.btn-spin:disabled {
+  opacity: 0.5;
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 #a02828;
+  cursor: not-allowed;
+}
+.result-box {
+  margin-top: 25px;
+  padding: 18px 30px;
+  background: rgba(255,255,255,0.92);
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  text-align: center;
+  min-height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 500px;
+  width: 100%;
+  transition: all 0.3s;
+}
+.result-box.highlight {
+  background: #fff;
+  box-shadow: 0 0 30px rgba(214, 48, 49, 0.4);
+}
+.result-label {
+  font-size: 1rem;
+  color: #888;
+}
+.result-text {
+  font-size: 1.6rem;
+  color: #d63031;
+  line-height: 1.4;
+}
+canvas#fireworks {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 100;
+}
+@media (max-width: 500px) {
+  h1 { font-size: 1.8rem; }
+  .wheel-container, canvas#wheel { width: 300px; height: 300px; }
+  .btn-spin { font-size: 1.3rem; padding: 12px 30px; }
+  .result-text { font-size: 1.2rem; }
+}
+</style>
+</head>
+<body>
+
+<h1>Cosa farà Cissè oggi al lavoro?</h1>
+<p class="subtitle">⚡ La ruota del destino lavorativo ⚡</p>
+
+<div class="wheel-container">
+  <div class="pointer"></div>
+  <canvas id="wheel" width="420" height="420"></canvas>
+</div>
+
+<button class="btn-spin" id="spinBtn">🎡 GIRA LA RUOTA!</button>
+
+<div class="result-box" id="resultBox">
+  <span class="result-label">Premi il pulsante per scoprire il destino di Cissè 🃏</span>
+</div>
+
+<canvas id="fireworks" width="window.innerWidth" height="window.innerHeight"></canvas>
+
+<script>
+const frasi = [
+  "Bloccare la serratura",
+  "Guardare un film",
+  "Prendere di mira Sbandi",
+  "Disegnare sul tavolo",
+  "Ascoltare la musica",
+  "Rubare lo sgabello ad Ahmed",
+  "Fare una videochiamata",
+  "Fare ragionamenti sulla vita in bagno",
+  "Organizzare un attentato terroristico in francese"
+];
+
+const colori = [
+  "#e74c3c", "#f39c12", "#2ecc71", "#3498db", "#9b59b6",
+  "#1abc9c", "#e67e22", "#00bcd4", "#ff6b81"
+];
+
+const canvas = document.getElementById('wheel');
+const ctx = canvas.getContext('2d');
+const N = frasi.length;
+const arco = (2 * Math.PI) / N;
+
+let angoloCorrente = 0;
+let spinning = false;
+
+function disegnaRuota() {
+  const cx = canvas.width / 2;
+  const cy = canvas.height / 2;
+  const r = canvas.width / 2 - 10;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  for (let i = 0; i < N; i++) {
+    const start = angoloCorrente + i * arco;
+    const end = start + arco;
+
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r, start, end);
+    ctx.closePath();
+    ctx.fillStyle = colori[i];
+    ctx.fill();
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    const angoloTesto = start + arco / 2;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(angoloTesto);
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 12px Arial';
+    ctx.shadowColor = 'rgba(0,0,0,0.5)';
+    ctx.shadowBlur = 3;
+
+    const parole = frasi[i].split(' ');
+    let riga = '';
+    let righe = [];
+    for (const parola of parole) {
+      if ((riga + ' ' + parola).length > 18) {
+        righe.push(riga);
+        riga = parola;
+      } else {
+        riga = riga ? riga + ' ' + parola : parola;
+      }
+    }
+    if (riga) righe.push(riga);
+
+    const lineHeight = 14;
+    const startY = -(righe.length - 1) * lineHeight / 2;
+    for (let j = 0; j < righe.length; j++) {
+      ctx.fillText(righe[j], r - 18, startY + j * lineHeight);
+    }
+    ctx.restore();
+  }
+
+  ctx.beginPath();
+  ctx.arc(cx, cy, 18, 0, 2 * Math.PI);
+  ctx.fillStyle = '#fff';
+  ctx.fill();
+  ctx.strokeStyle = '#d63031';
+  ctx.lineWidth = 3;
+  ctx.stroke();
+}
+
+function getIndiceVincente() {
+  let ang = angoloCorrente % (2 * Math.PI);
+  if (ang < 0) ang += 2 * Math.PI;
+  ang = (2 * Math.PI - ang) % (2 * Math.PI);
+  return Math.floor(ang / arco) % N;
+}
+
+function mostraRisultato(indice) {
+  const box = document.getElementById('resultBox');
+  box.innerHTML = `<span class="result-text">🎯 Oggi Cissè farà questo: <strong>"${frasi[indice]}"</strong></span>`;
+  box.classList.add('highlight');
+  avviaFuochi();
+}
+
+const spinBtn = document.getElementById('spinBtn');
+
+function giraRuota() {
+  if (spinning) return;
+  spinning = true;
+  spinBtn.disabled = true;
+
+  const box = document.getElementById('resultBox');
+  box.classList.remove('highlight');
+
+  const giriExtra = 5 + Math.random() * 5;
+  const angoloFinale = giriExtra * 2 * Math.PI + Math.random() * 2 * Math.PI;
+  const durata = 4000 + Math.random() * 2000;
+  const start = performance.now();
+  const angoloIniziale = angoloCorrente;
+
+  function anima(now) {
+    const elapsed = now - start;
+    const progress = Math.min(elapsed / durata, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    angoloCorrente = angoloIniziale + angoloFinale * eased;
+    disegnaRuota();
+    if (progress < 1) {
+      requestAnimationFrame(anima);
+    } else {
+      angoloCorrente = angoloIniziale + angoloFinale;
+      disegnaRuota();
+      const indice = getIndiceVincente();
+      mostraRisultato(indice);
+      spinning = false;
+      spinBtn.disabled = false;
+    }
+  }
+  requestAnimationFrame(anima);
+}
+
+spinBtn.addEventListener('click', giraRuota);
+
+// ---- FUOCHI D'ARTIFICIO ----
+const fwCanvas = document.getElementById('fireworks');
+const fwCtx = fwCanvas.getContext('2d');
+
+function resizeFw() {
+  fwCanvas.width = window.innerWidth;
+  fwCanvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resizeFw);
+resizeFw();
+
+let fuochiAttivi = false;
+let particelle = [];
+const coloriFw = ['#ff0', '#f0f', '#0ff', '#f00', '#0f0', '#ff6600', '#ff0066', '#66ff00'];
+
+class Particella {
+  constructor(x, y, colore) {
+    this.x = x;
+    this.y = y;
+    const angolo = Math.random() * 2 * Math.PI;
+    const vel = 2 + Math.random() * 6;
+    this.vx = Math.cos(angolo) * vel;
+    this.vy = Math.sin(angolo) * vel;
+    this.colore = colore || coloriFw[Math.floor(Math.random() * coloriFw.length)];
+    this.alpha = 1;
+    this.decay = 0.008 + Math.random() * 0.015;
+    this.trail = [];
+  }
+
+  update() {
+    this.trail.push({ x: this.x, y: this.y, alpha: this.alpha });
+    if (this.trail.length > 6) this.trail.shift();
+    this.x += this.vx;
+    this.y += this.vy;
+    this.vy += 0.04;
+    this.alpha -= this.decay;
+  }
+
+  draw(ctx) {
+    for (let i = 0; i < this.trail.length; i++) {
+      const t = this.trail[i];
+      ctx.beginPath();
+      ctx.arc(t.x, t.y, 2 - i * 0.2, 0, Math.PI * 2);
+      ctx.fillStyle = this.colore;
+      ctx.globalAlpha = t.alpha * 0.3;
+      ctx.fill();
+    }
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
+    ctx.fillStyle = this.colore;
+    ctx.globalAlpha = this.alpha;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+}
+
+function esplodi(x, y, count) {
+  for (let i = 0; i < count; i++) {
+    particelle.push(new Particella(x, y));
+  }
+}
+
+function avviaFuochi() {
+  fuochiAttivi = true;
+  const count = 3 + Math.floor(Math.random() * 3);
+  for (let i = 0; i < count; i++) {
+    setTimeout(() => {
+      esplodi(
+        Math.random() * fwCanvas.width,
+        Math.random() * fwCanvas.height * 0.6,
+        80 + Math.floor(Math.random() * 60)
+      );
+    }, i * 400);
+  }
+  setTimeout(() => {
+    esplodi(
+      Math.random() * fwCanvas.width * 0.8 + fwCanvas.width * 0.1,
+      Math.random() * fwCanvas.height * 0.4,
+      100
+    );
+  }, count * 400 + 600);
+  setTimeout(() => {
+    fuochiAttivi = false;
+  }, 8000);
+}
+
+function loopFuochi() {
+  if (!fuochiAttivi && particelle.length === 0) {
+    requestAnimationFrame(loopFuochi);
+    return;
+  }
+  fwCtx.clearRect(0, 0, fwCanvas.width, fwCanvas.height);
+  for (let i = particelle.length - 1; i >= 0; i--) {
+    particelle[i].update();
+    particelle[i].draw(fwCtx);
+    if (particelle[i].alpha <= 0) {
+      particelle.splice(i, 1);
+    }
+  }
+  requestAnimationFrame(loopFuochi);
+}
+loopFuochi();
+
+disegnaRuota();
+</script>
+</body>
+</html>
