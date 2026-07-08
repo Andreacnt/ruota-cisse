@@ -130,6 +130,46 @@ canvas#fireworks {
   pointer-events: none;
   z-index: 100;
 }
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.7);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.3s;
+}
+.modal-overlay.show { display: flex; }
+.modal-content {
+  background: linear-gradient(135deg, #fff8e1, #fff3cd);
+  border-radius: 30px;
+  padding: 40px 50px;
+  text-align: center;
+  max-width: 480px;
+  width: 90%;
+  box-shadow: 0 0 60px rgba(214,48,49,0.5), 0 0 0 6px #d63031, 0 0 0 10px #fdcb6e;
+  animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.modal-emoji { font-size: 4rem; margin-bottom: 10px; animation: bounce 1s infinite; }
+.modal-title { font-family: 'Luckiest Guy', cursive; font-size: 1.8rem; color: #d63031; margin-bottom: 15px; }
+.modal-frase { font-family: 'Fredoka One', cursive; font-size: 1.6rem; color: #2d3436; padding: 15px 10px; background: rgba(255,255,255,0.7); border-radius: 16px; margin-bottom: 20px; line-height: 1.4; }
+.modal-btn {
+  font-family: 'Luckiest Guy', cursive;
+  font-size: 1.3rem;
+  padding: 12px 36px;
+  background: linear-gradient(135deg, #d63031, #e17055);
+  color: #fff;
+  border: none;
+  border-radius: 60px;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #a02828;
+  transition: all 0.08s linear;
+}
+.modal-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 #a02828; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes popIn { from { transform: scale(0.3); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
 @media (max-width: 500px) {
   h1 { font-size: 1.8rem; }
   .wheel-container, canvas#wheel { width: 300px; height: 300px; }
@@ -152,6 +192,15 @@ canvas#fireworks {
 
 <div class="result-box" id="resultBox">
   <span class="result-label">Premi il pulsante per scoprire il destino di Cissè 🃏</span>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-content">
+    <div class="modal-emoji">🎯</div>
+    <div class="modal-title">Oggi Cissè farà questo:</div>
+    <div class="modal-frase" id="modalFrase"></div>
+    <button class="modal-btn" id="modalBtn">🔄 GIRA ANCORA!</button>
+  </div>
 </div>
 
 <canvas id="fireworks" width="window.innerWidth" height="window.innerHeight"></canvas>
@@ -207,16 +256,13 @@ function disegnaRuota() {
     ctx.translate(cx, cy);
     ctx.rotate(angoloTesto);
     ctx.textAlign = 'right';
-    ctx.fillStyle = '#fff';
-    ctx.font = 'bold 12px Arial';
-    ctx.shadowColor = 'rgba(0,0,0,0.5)';
-    ctx.shadowBlur = 3;
+    ctx.font = 'bold 14px Arial';
 
     const parole = frasi[i].split(' ');
     let riga = '';
     let righe = [];
     for (const parola of parole) {
-      if ((riga + ' ' + parola).length > 18) {
+      if ((riga + ' ' + parola).length > 14) {
         righe.push(riga);
         riga = parola;
       } else {
@@ -225,10 +271,17 @@ function disegnaRuota() {
     }
     if (riga) righe.push(riga);
 
-    const lineHeight = 14;
+    const lineHeight = 16;
     const startY = -(righe.length - 1) * lineHeight / 2;
     for (let j = 0; j < righe.length; j++) {
-      ctx.fillText(righe[j], r - 18, startY + j * lineHeight);
+      ctx.shadowColor = 'rgba(0,0,0,0.8)';
+      ctx.shadowBlur = 4;
+      ctx.fillStyle = '#fff';
+      ctx.fillText(righe[j], r - 20, startY + j * lineHeight);
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+      ctx.lineWidth = 2;
+      ctx.strokeText(righe[j], r - 20, startY + j * lineHeight);
     }
     ctx.restore();
   }
@@ -253,6 +306,8 @@ function mostraRisultato(indice) {
   const box = document.getElementById('resultBox');
   box.innerHTML = `<span class="result-text">🎯 Oggi Cissè farà questo: <strong>"${frasi[indice]}"</strong></span>`;
   box.classList.add('highlight');
+  document.getElementById('modalFrase').textContent = frasi[indice];
+  document.getElementById('modalOverlay').classList.add('show');
   avviaFuochi();
 }
 
@@ -293,6 +348,13 @@ function giraRuota() {
 }
 
 spinBtn.addEventListener('click', giraRuota);
+
+document.getElementById('modalBtn').addEventListener('click', function() {
+  document.getElementById('modalOverlay').classList.remove('show');
+});
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+  if (e.target === this) this.classList.remove('show');
+});
 
 // ---- FUOCHI D'ARTIFICIO ----
 const fwCanvas = document.getElementById('fireworks');
