@@ -446,6 +446,7 @@ const colori = [
 ];
 
 const STORAGE_KEY = 'ruota-cisse-storico';
+const API_URL = 'https://script.google.com/macros/s/AKfycbyqakcMa-vllaEO-qZ6K-EbOb7pAfidBNrC_sFWIoatMpIHzsj5cM2m_5igRa0U2PlS/exec';
 const N = frasi.length;
 const arco = (2 * Math.PI) / N;
 const VEL_SPIN = 0.18;
@@ -478,7 +479,23 @@ function salvaStorico(data) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
 
-function aggiungiLancio(nome, frase) {
+async function aggiornaDaServer() {
+  try {
+    const res = await fetch(API_URL);
+    const data = await res.json();
+    if (data && data.length) salvaStorico(data);
+  } catch {}
+}
+
+async function aggiungiLancio(nome, frase) {
+  try {
+    await fetch(API_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nome, frase })
+    });
+  } catch {}
   const storico = getStorico();
   storico.unshift({ nome, frase, data: new Date().toISOString() });
   salvaStorico(storico);
@@ -691,7 +708,10 @@ function animaRuota(time) {
     if (progressoDecel >= 1) {
       progressoDecel = 1;
       angolo = targetAngolo;
-      disegnaRuota();
+disegnaRuota();
+aggiornaDaServer().then(() => {
+  mostraClassifica('freq');
+});
       const indice = getIndiceVincente();
       stato = Stato.FERMO;
       spinBtn.textContent = '🎡 GIRA LA RUOTA!';
