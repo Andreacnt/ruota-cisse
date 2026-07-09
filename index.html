@@ -702,6 +702,8 @@ playerNameInput.addEventListener('input', function() {
     this.value = val.toUpperCase();
   }
 });
+
+document.getElementById('modalBtn').addEventListener('click', function() {
   document.getElementById('modalOverlay').classList.remove('show');
 });
 document.getElementById('modalOverlay').addEventListener('click', function(e) {
