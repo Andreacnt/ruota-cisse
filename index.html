@@ -397,7 +397,8 @@ canvas#fireworks {
 </div>
 
 <div class="classifica-wrap">
-  <h2>🏆 CLASSIFICA</h2>
+  <h2>🏆 CLASSIFICA DEL GIORNO</h2>
+  <p style="font-size:0.8rem;color:#888;text-align:center;margin-bottom:8px;" id="classificaData"></p>
   <div class="classifica-tabs">
     <button class="attivo" data-tab="freq">Più frequenti</button>
     <button data-tab="log">Ultimi lanci</button>
@@ -573,10 +574,22 @@ function buildLegend() {
 buildLegend();
 
 // ---- CLASSIFICA ----
+function isOggi(dataISO) {
+  const oggi = new Date();
+  const d = new Date(dataISO);
+  return d.getFullYear() === oggi.getFullYear() &&
+         d.getMonth() === oggi.getMonth() &&
+         d.getDate() === oggi.getDate();
+}
+
 function mostraClassifica(tab) {
-  const storico = getStorico();
+  const oggi = new Date();
+  document.getElementById('classificaData').textContent =
+    `📅 ${oggi.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}`;
+
+  const storico = getStorico().filter(s => isOggi(s.data));
   if (storico.length === 0) {
-    classificaBody.innerHTML = '<div class="classifica-vuota">Ancora nessun lancio — sii il primo!</div>';
+    classificaBody.innerHTML = '<div class="classifica-vuota">Ancora nessun lancio oggi — sii il primo!</div>';
     return;
   }
 
