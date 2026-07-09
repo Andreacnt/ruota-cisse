@@ -489,11 +489,14 @@ async function aggiornaDaServer() {
 
 async function aggiungiLancio(nome, frase) {
   try {
+    const formData = new URLSearchParams();
+    formData.append('nome', nome);
+    formData.append('frase', frase);
     await fetch(API_URL, {
       method: 'POST',
       mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nome, frase })
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: formData
     });
   } catch {}
   const storico = getStorico();

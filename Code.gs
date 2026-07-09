@@ -11,8 +11,7 @@ function doGet(e) {
 
 function doPost(e) {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  const body = JSON.parse(e.postData.contents);
-  sheet.appendRow([body.nome, body.frase, new Date().toISOString()]);
+  sheet.appendRow([e.parameter.nome, e.parameter.frase, new Date().toISOString()]);
   return ContentService.createTextOutput(JSON.stringify({ ok: true }))
     .setMimeType(ContentService.MimeType.JSON);
 }
