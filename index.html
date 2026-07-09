@@ -64,8 +64,9 @@ h1 {
 }
 .game-area {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
+  gap: 20px;
   flex-wrap: wrap;
 }
 .wheel-container {
@@ -164,6 +165,54 @@ canvas#wheel {
   font-size: 0.9rem;
   color: #888;
   margin-top: 4px;
+}
+/* LEGEND */
+.legend {
+  background: rgba(255,255,255,0.85);
+  border-radius: 16px;
+  padding: 12px 14px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  flex: 1;
+  min-width: 220px;
+  max-width: 320px;
+}
+.legend-title {
+  font-family: 'Luckiest Guy', cursive;
+  font-size: 1rem;
+  color: #d63031;
+  margin-bottom: 8px;
+  text-align: center;
+}
+.legend-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 10px;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.75rem;
+  color: #2d3436;
+  padding: 2px 0;
+}
+.legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  border: 1px solid rgba(0,0,0,0.1);
+}
+.legend-num {
+  font-weight: bold;
+  color: #888;
+  min-width: 14px;
+  font-size: 0.7rem;
+  text-align: right;
+}
+.legend-text {
+  flex: 1;
+  line-height: 1.2;
 }
 /* CLASSIFICA */
 .classifica-wrap {
@@ -337,6 +386,7 @@ canvas#fireworks {
     <div class="pointer"></div>
     <canvas id="wheel" width="420" height="420"></canvas>
   </div>
+  <div class="legend" id="legend"></div>
 </div>
 
 <button class="btn-spin" id="spinBtn">🎡 GIRA LA RUOTA!</button>
@@ -466,34 +516,16 @@ function disegnaRuota() {
     ctx.save();
     ctx.translate(cx, cy);
     ctx.rotate(angoloTesto);
-    ctx.textAlign = 'right';
-    ctx.font = 'bold 10px Arial';
 
-    const parole = frasi[i].split(' ');
-    let riga = '';
-    let righe = [];
-    for (const parola of parole) {
-      if ((riga + ' ' + parola).length > 10) {
-        righe.push(riga);
-        riga = parola;
-      } else {
-        riga = riga ? riga + ' ' + parola : parola;
-      }
-    }
-    if (riga) righe.push(riga);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = 'bold 26px Arial';
+    ctx.shadowColor = 'rgba(0,0,0,0.6)';
+    ctx.shadowBlur = 5;
+    ctx.fillStyle = '#fff';
+    ctx.fillText(i + 1, r * 0.55, 0);
+    ctx.shadowBlur = 0;
 
-    const lineHeight = 12;
-    const startY = -(righe.length - 1) * lineHeight / 2;
-    for (let j = 0; j < righe.length; j++) {
-      ctx.shadowColor = 'rgba(0,0,0,0.8)';
-      ctx.shadowBlur = 4;
-      ctx.fillStyle = '#fff';
-      ctx.fillText(righe[j], r - 14, startY + j * lineHeight);
-      ctx.shadowBlur = 0;
-      ctx.strokeStyle = 'rgba(0,0,0,0.3)';
-      ctx.lineWidth = 1;
-      ctx.strokeText(righe[j], r - 14, startY + j * lineHeight);
-    }
     ctx.restore();
   }
 
@@ -512,6 +544,23 @@ function getIndiceVincente() {
   a = (2 * Math.PI - a) % (2 * Math.PI);
   return Math.floor(a / arco) % N;
 }
+
+// ---- LEGENDA ----
+function buildLegend() {
+  const el = document.getElementById('legend');
+  let html = '<div class="legend-title">📋 Legenda</div><div class="legend-grid">';
+  for (let i = 0; i < N; i++) {
+    html += `
+      <div class="legend-item">
+        <span class="legend-color" style="background:${colori[i]}"></span>
+        <span class="legend-num">${i+1}</span>
+        <span class="legend-text">${frasi[i]}</span>
+      </div>`;
+  }
+  html += '</div>';
+  el.innerHTML = html;
+}
+buildLegend();
 
 // ---- CLASSIFICA ----
 function mostraClassifica(tab) {
