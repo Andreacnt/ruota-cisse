@@ -488,25 +488,7 @@ async function aggiornaDaServer() {
 }
 
 function aggiungiLancio(nome, frase) {
-  const iframe = document.createElement('iframe');
-  iframe.style.display = 'none';
-  document.body.appendChild(iframe);
-  const form = document.createElement('form');
-  form.method = 'POST';
-  form.action = API_URL;
-  form.target = iframe.name = 'f' + Date.now();
-  ['nome','frase'].forEach(k => {
-    const inp = document.createElement('input');
-    inp.name = k;
-    inp.value = k === 'nome' ? nome : frase;
-    form.appendChild(inp);
-  });
-  document.body.appendChild(form);
-  form.submit();
-  setTimeout(() => {
-    document.body.removeChild(form);
-    document.body.removeChild(iframe);
-  }, 2000);
+  navigator.sendBeacon(API_URL, new URLSearchParams({ nome, frase }));
   const storico = getStorico();
   storico.unshift({ nome, frase, data: new Date().toISOString() });
   salvaStorico(storico);
