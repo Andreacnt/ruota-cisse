@@ -484,7 +484,14 @@ async function aggiornaDaServer() {
   try {
     const res = await fetch(API_URL);
     const data = await res.json();
-    if (data && data.length) salvaStorico(data);
+    if (data && data.length) {
+      const local = getStorico();
+      for (const entry of data) {
+        const exists = local.some(s => s.data === entry.data && s.nome === entry.nome);
+        if (!exists) local.push(entry);
+      }
+      salvaStorico(local);
+    }
   } catch {}
 }
 
@@ -550,9 +557,8 @@ function disegnaRuota() {
 }
 
 function getIndiceVincente() {
-  let a = angolo % (2 * Math.PI);
+  let a = (3 * Math.PI / 2 - angolo) % (2 * Math.PI);
   if (a < 0) a += 2 * Math.PI;
-  a = (2 * Math.PI - a) % (2 * Math.PI);
   return Math.floor(a / arco) % N;
 }
 
@@ -695,12 +701,14 @@ function onClickSpin() {
 spinBtn.addEventListener('click', onClickSpin);
 
 playerNameInput.addEventListener('input', function() {
+  const start = this.selectionStart;
   const val = this.value;
   if (val.length > 1) {
     this.value = val.charAt(0).toUpperCase() + val.slice(1).toLowerCase();
   } else if (val.length === 1) {
     this.value = val.toUpperCase();
   }
+  if (this.selectionStart !== start) this.setSelectionRange(start, start);
 });
 
 document.getElementById('modalBtn').addEventListener('click', function() {
@@ -725,10 +733,7 @@ function animaRuota(time) {
     if (progressoDecel >= 1) {
       progressoDecel = 1;
       angolo = targetAngolo;
-disegnaRuota();
-aggiornaDaServer().then(() => {
-  mostraClassifica('freq');
-});
+      disegnaRuota();
       const indice = getIndiceVincente();
       stato = Stato.FERMO;
       spinBtn.textContent = '🎡 GIRA LA RUOTA!';
