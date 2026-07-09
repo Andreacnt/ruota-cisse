@@ -487,18 +487,26 @@ async function aggiornaDaServer() {
   } catch {}
 }
 
-async function aggiungiLancio(nome, frase) {
-  try {
-    const formData = new URLSearchParams();
-    formData.append('nome', nome);
-    formData.append('frase', frase);
-    await fetch(API_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: formData
-    });
-  } catch {}
+function aggiungiLancio(nome, frase) {
+  const iframe = document.createElement('iframe');
+  iframe.style.display = 'none';
+  document.body.appendChild(iframe);
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = API_URL;
+  form.target = iframe.name = 'f' + Date.now();
+  ['nome','frase'].forEach(k => {
+    const inp = document.createElement('input');
+    inp.name = k;
+    inp.value = k === 'nome' ? nome : frase;
+    form.appendChild(inp);
+  });
+  document.body.appendChild(form);
+  form.submit();
+  setTimeout(() => {
+    document.body.removeChild(form);
+    document.body.removeChild(iframe);
+  }, 2000);
   const storico = getStorico();
   storico.unshift({ nome, frase, data: new Date().toISOString() });
   salvaStorico(storico);
@@ -662,13 +670,15 @@ function mostraRisultato(indice) {
 
 // ---- SPIN LOGIC ----
 function onClickSpin() {
-  const nome = playerNameInput.value.trim();
-  if (!nome && stato === Stato.FERMO) {
+  const raw = playerNameInput.value.trim();
+  if (!raw && stato === Stato.FERMO) {
     playerNameInput.focus();
     playerNameInput.style.borderColor = '#d63031';
     setTimeout(() => playerNameInput.style.borderColor = '#e17055', 1500);
     return;
   }
+  const nome = raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase();
+  playerNameInput.value = nome;
 
   if (stato === Stato.FERMO) {
     stato = Stato.GIRA;
