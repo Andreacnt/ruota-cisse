@@ -13,17 +13,9 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   font-family: 'Fredoka One', cursive;
   padding: 20px;
   overflow-x: hidden;
-}
-.game-area {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  flex-wrap: wrap;
 }
 h1 {
   font-family: 'Luckiest Guy', cursive;
@@ -31,14 +23,50 @@ h1 {
   color: #d63031;
   text-shadow: 3px 3px 0 #fdcb6e, 6px 6px 0 #e17055;
   text-align: center;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
   letter-spacing: 2px;
 }
 .subtitle {
   font-size: 1.1rem;
   color: #6c3a1e;
-  margin-bottom: 25px;
+  margin-bottom: 12px;
   opacity: 0.8;
+  text-align: center;
+}
+.player-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 15px;
+  background: rgba(255,255,255,0.7);
+  padding: 8px 18px;
+  border-radius: 30px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+.player-input label {
+  font-size: 1rem;
+  color: #6c3a1e;
+}
+.player-input input {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1rem;
+  padding: 6px 12px;
+  border: 2px solid #e17055;
+  border-radius: 20px;
+  outline: none;
+  background: #fff;
+  min-width: 130px;
+  color: #2d3436;
+}
+.player-input input:focus {
+  border-color: #d63031;
+  box-shadow: 0 0 0 3px rgba(214,48,49,0.15);
+}
+.game-area {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 .wheel-container {
   position: relative;
@@ -77,7 +105,7 @@ canvas#wheel {
   border: 3px solid #fff;
 }
 .btn-spin {
-  margin-top: 30px;
+  margin: 20px 0 15px;
   font-family: 'Luckiest Guy', cursive;
   font-size: 1.8rem;
   padding: 14px 50px;
@@ -100,33 +128,139 @@ canvas#wheel {
   box-shadow: 0 2px 0 #a02828;
   cursor: not-allowed;
 }
+.btn-spin.ferma {
+  background: linear-gradient(135deg, #2d3436, #636e72);
+  box-shadow: 0 6px 0 #1a1e20;
+}
 .result-box {
-  margin-top: 25px;
-  padding: 18px 30px;
+  padding: 15px 25px;
   background: rgba(255,255,255,0.92);
   border-radius: 20px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.1);
   text-align: center;
-  min-height: 70px;
+  min-height: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
-  max-width: 500px;
+  max-width: 520px;
   width: 100%;
   transition: all 0.3s;
+  margin-bottom: 25px;
 }
 .result-box.highlight {
   background: #fff;
   box-shadow: 0 0 30px rgba(214, 48, 49, 0.4);
 }
 .result-label {
-  font-size: 1rem;
+  font-size: 0.95rem;
   color: #888;
 }
 .result-text {
-  font-size: 1.6rem;
+  font-size: 1.4rem;
   color: #d63031;
   line-height: 1.4;
+}
+.result-name {
+  font-size: 0.9rem;
+  color: #888;
+  margin-top: 4px;
+}
+/* CLASSIFICA */
+.classifica-wrap {
+  width: 100%;
+  max-width: 520px;
+  margin-bottom: 20px;
+}
+.classifica-wrap h2 {
+  font-family: 'Luckiest Guy', cursive;
+  font-size: 1.6rem;
+  color: #d63031;
+  margin-bottom: 10px;
+  text-align: center;
+}
+.classifica-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+  justify-content: center;
+}
+.classifica-tabs button {
+  font-family: 'Fredoka One', cursive;
+  font-size: 0.85rem;
+  padding: 6px 18px;
+  border: 2px solid #e17055;
+  border-radius: 20px;
+  background: transparent;
+  color: #6c3a1e;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.classifica-tabs button.attivo {
+  background: #e17055;
+  color: #fff;
+  border-color: #e17055;
+}
+.classifica-tabs button:hover:not(.attivo) {
+  background: rgba(225,112,85,0.15);
+}
+.classifica-body {
+  background: rgba(255,255,255,0.85);
+  border-radius: 16px;
+  padding: 12px 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  min-height: 40px;
+}
+.voce-classifica {
+  display: flex;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  gap: 8px;
+}
+.voce-classifica:last-child { border-bottom: none; }
+.voce-classifica .pos {
+  font-size: 1rem;
+  color: #888;
+  min-width: 24px;
+  text-align: center;
+}
+.voce-classifica .frase {
+  flex: 1;
+  font-size: 0.85rem;
+  color: #2d3436;
+}
+.voce-classifica .count {
+  font-size: 1.1rem;
+  color: #d63031;
+  font-family: 'Luckiest Guy', cursive;
+  min-width: 30px;
+  text-align: center;
+}
+.voce-classifica .bar {
+  height: 8px;
+  background: linear-gradient(90deg, #e17055, #d63031);
+  border-radius: 4px;
+  min-width: 4px;
+  transition: width 0.4s;
+}
+.voce-log {
+  font-size: 0.85rem;
+  color: #555;
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+.voce-log:last-child { border-bottom: none; }
+.voce-log .log-nome { font-weight: bold; color: #d63031; }
+.voce-log .log-frase { color: #2d3436; flex: 1; text-align: center; }
+.voce-log .log-data { color: #aaa; font-size: 0.75rem; white-space: nowrap; }
+.classifica-vuota {
+  text-align: center;
+  color: #aaa;
+  padding: 20px 0;
+  font-size: 0.9rem;
 }
 canvas#fireworks {
   position: fixed;
@@ -151,7 +285,7 @@ canvas#fireworks {
 .modal-content {
   background: linear-gradient(135deg, #fff8e1, #fff3cd);
   border-radius: 30px;
-  padding: 40px 50px;
+  padding: 35px 40px;
   text-align: center;
   max-width: 480px;
   width: 90%;
@@ -174,9 +308,6 @@ canvas#fireworks {
   transition: all 0.08s linear;
 }
 .modal-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 #a02828; }
-
-
-
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes popIn { from { transform: scale(0.3); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
@@ -184,7 +315,8 @@ canvas#fireworks {
   h1 { font-size: 1.8rem; }
   .wheel-container, canvas#wheel { width: 300px; height: 300px; }
   .btn-spin { font-size: 1.3rem; padding: 12px 30px; }
-  .result-text { font-size: 1.2rem; }
+  .result-text { font-size: 1.1rem; }
+  .classifica-wrap h2 { font-size: 1.2rem; }
 }
 </style>
 </head>
@@ -193,19 +325,34 @@ canvas#fireworks {
 <h1>Cosa farà Cissè oggi al lavoro?</h1>
 <p class="subtitle">⚡ La ruota del destino lavorativo ⚡</p>
 
-<div class="game-area">
-
-<div class="wheel-container">
-  <div class="pointer"></div>
-  <canvas id="wheel" width="420" height="420"></canvas>
+<div class="player-input">
+  <label>👤 Nome:</label>
+  <input type="text" id="playerName" placeholder="Chi sei?" list="nameList" autocomplete="off">
+  <datalist id="nameList"></datalist>
 </div>
 
+<div class="game-area">
+  <div class="wheel-container">
+    <div class="pointer"></div>
+    <canvas id="wheel" width="420" height="420"></canvas>
+  </div>
 </div>
 
 <button class="btn-spin" id="spinBtn">🎡 GIRA LA RUOTA!</button>
 
 <div class="result-box" id="resultBox">
   <span class="result-label">Premi il pulsante per scoprire il destino di Cissè 🃏</span>
+</div>
+
+<div class="classifica-wrap">
+  <h2>🏆 CLASSIFICA</h2>
+  <div class="classifica-tabs">
+    <button class="attivo" data-tab="freq">Più frequenti</button>
+    <button data-tab="log">Ultimi lanci</button>
+  </div>
+  <div class="classifica-body" id="classificaBody">
+    <div class="classifica-vuota">Ancora nessun lancio — sii il primo!</div>
+  </div>
 </div>
 
 <div class="modal-overlay" id="modalOverlay">
@@ -217,9 +364,10 @@ canvas#fireworks {
   </div>
 </div>
 
-<canvas id="fireworks" width="window.innerWidth" height="window.innerHeight"></canvas>
+<canvas id="fireworks"></canvas>
 
 <script>
+// ---- CONFIGURAZIONE ----
 const frasi = [
   "Bloccare la serratura",
   "Guardare un film",
@@ -229,22 +377,65 @@ const frasi = [
   "Rubare lo sgabello ad Ahmed",
   "Fare una videochiamata",
   "Fare ragionamenti sulla vita in bagno",
-  "Organizzare un attentato terroristico in francese"
+  "Organizzare un attentato terroristico in francese",
+  "Far passare il muletto dalla porta",
+  "Far schiantare il robot",
+  "Faccio quello che mi piace"
 ];
 
 const colori = [
   "#e74c3c", "#f39c12", "#2ecc71", "#3498db", "#9b59b6",
-  "#1abc9c", "#e67e22", "#00bcd4", "#ff6b81"
+  "#1abc9c", "#e67e22", "#00bcd4", "#ff6b81",
+  "#a29bfe", "#fd79a8", "#00cec9"
 ];
 
-const canvas = document.getElementById('wheel');
-const ctx = canvas.getContext('2d');
+const STORAGE_KEY = 'ruota-cisse-storico';
 const N = frasi.length;
 const arco = (2 * Math.PI) / N;
+const VEL_SPIN = 0.18;
 
-let angoloCorrente = 0;
-let spinning = false;
+// ---- STATO ----
+const Stato = { FERMO: 0, GIRA: 1, FERMA: 2 };
+let stato = Stato.FERMO;
+let angolo = 0;
+let targetAngolo = 0;
+let angoloPartenza = 0;
+let progressoDecel = 0;
 
+// ---- DOM ----
+const canvas = document.getElementById('wheel');
+const ctx = canvas.getContext('2d');
+const spinBtn = document.getElementById('spinBtn');
+const resultBox = document.getElementById('resultBox');
+const playerNameInput = document.getElementById('playerName');
+const nameList = document.getElementById('nameList');
+const classificaBody = document.getElementById('classificaBody');
+
+// ---- STORAGE ----
+function getStorico() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+  } catch { return []; }
+}
+
+function salvaStorico(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function aggiungiLancio(nome, frase) {
+  const storico = getStorico();
+  storico.unshift({ nome, frase, data: new Date().toISOString() });
+  salvaStorico(storico);
+}
+
+function aggiornaNameList() {
+  const storico = getStorico();
+  const nomi = [...new Set(storico.map(s => s.nome))];
+  nameList.innerHTML = nomi.map(n => `<option value="${n}">`).join('');
+}
+aggiornaNameList();
+
+// ---- DISEGNO RUOTA ----
 function disegnaRuota() {
   const cx = canvas.width / 2;
   const cy = canvas.height / 2;
@@ -252,7 +443,7 @@ function disegnaRuota() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   for (let i = 0; i < N; i++) {
-    const start = angoloCorrente + i * arco;
+    const start = angolo + i * arco;
     const end = start + arco;
 
     ctx.beginPath();
@@ -270,13 +461,13 @@ function disegnaRuota() {
     ctx.translate(cx, cy);
     ctx.rotate(angoloTesto);
     ctx.textAlign = 'right';
-    ctx.font = 'bold 14px Arial';
+    ctx.font = 'bold 11px Arial';
 
     const parole = frasi[i].split(' ');
     let riga = '';
     let righe = [];
     for (const parola of parole) {
-      if ((riga + ' ' + parola).length > 14) {
+      if ((riga + ' ' + parola).length > 12) {
         righe.push(riga);
         riga = parola;
       } else {
@@ -285,17 +476,17 @@ function disegnaRuota() {
     }
     if (riga) righe.push(riga);
 
-    const lineHeight = 16;
+    const lineHeight = 13;
     const startY = -(righe.length - 1) * lineHeight / 2;
     for (let j = 0; j < righe.length; j++) {
       ctx.shadowColor = 'rgba(0,0,0,0.8)';
       ctx.shadowBlur = 4;
       ctx.fillStyle = '#fff';
-      ctx.fillText(righe[j], r - 20, startY + j * lineHeight);
+      ctx.fillText(righe[j], r - 16, startY + j * lineHeight);
       ctx.shadowBlur = 0;
       ctx.strokeStyle = 'rgba(0,0,0,0.3)';
-      ctx.lineWidth = 2;
-      ctx.strokeText(righe[j], r - 20, startY + j * lineHeight);
+      ctx.lineWidth = 1.5;
+      ctx.strokeText(righe[j], r - 16, startY + j * lineHeight);
     }
     ctx.restore();
   }
@@ -310,59 +501,116 @@ function disegnaRuota() {
 }
 
 function getIndiceVincente() {
-  let ang = angoloCorrente % (2 * Math.PI);
-  if (ang < 0) ang += 2 * Math.PI;
-  ang = (2 * Math.PI - ang) % (2 * Math.PI);
-  return Math.floor(ang / arco) % N;
+  let a = angolo % (2 * Math.PI);
+  if (a < 0) a += 2 * Math.PI;
+  a = (2 * Math.PI - a) % (2 * Math.PI);
+  return Math.floor(a / arco) % N;
 }
 
-function mostraRisultato(indice) {
-  const box = document.getElementById('resultBox');
-  box.innerHTML = `<span class="result-text">🎯 Oggi Cissè farà questo: <strong>"${frasi[indice]}"</strong></span>`;
-  box.classList.add('highlight');
-  document.getElementById('modalFrase').textContent = frasi[indice];
-  document.getElementById('modalOverlay').classList.add('show');
+// ---- CLASSIFICA ----
+function mostraClassifica(tab) {
+  const storico = getStorico();
+  if (storico.length === 0) {
+    classificaBody.innerHTML = '<div class="classifica-vuota">Ancora nessun lancio — sii il primo!</div>';
+    return;
+  }
 
+  if (tab === 'freq') {
+    const conteggi = {};
+    for (const s of storico) {
+      conteggi[s.frase] = (conteggi[s.frase] || 0) + 1;
+    }
+    const sorted = Object.entries(conteggi).sort((a, b) => b[1] - a[1]);
+    const maxCount = sorted[0][1];
+
+    let html = '';
+    for (let i = 0; i < sorted.length; i++) {
+      const [frase, count] = sorted[i];
+      const pct = (count / maxCount) * 100;
+      const medaglie = ['🥇', '🥈', '🥉'];
+      const pos = i < 3 ? medaglie[i] : `#${i+1}`;
+      html += `
+        <div class="voce-classifica">
+          <span class="pos">${pos}</span>
+          <span class="frase">${frase}</span>
+          <span class="count">${count}</span>
+          <div class="bar" style="width:${pct}%"></div>
+        </div>`;
+    }
+    classificaBody.innerHTML = html;
+  } else {
+    const recenti = storico.slice(0, 30);
+    let html = '';
+    for (const s of recenti) {
+      const data = new Date(s.data);
+      const ora = data.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+      html += `
+        <div class="voce-log">
+          <span class="log-nome">${s.nome}</span>
+          <span class="log-frase">${s.frase}</span>
+          <span class="log-data">${ora}</span>
+        </div>`;
+    }
+    classificaBody.innerHTML = html;
+  }
+}
+
+// ---- TAB CLASSIFICA ----
+document.querySelectorAll('.classifica-tabs button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.classifica-tabs button').forEach(b => b.classList.remove('attivo'));
+    btn.classList.add('attivo');
+    mostraClassifica(btn.dataset.tab);
+  });
+});
+
+// ---- MOSTRA RISULTATO ----
+function mostraRisultato(indice) {
+  const nome = playerNameInput.value.trim() || 'Anonimo';
+  const frase = frasi[indice];
+  aggiungiLancio(nome, frase);
+  aggiornaNameList();
+
+  resultBox.innerHTML = `
+    <div>
+      <div class="result-text">🎯 Oggi Cissè farà questo: <strong>"${frase}"</strong></div>
+      <div class="result-name">👤 ${nome}</div>
+    </div>`;
+  resultBox.classList.add('highlight');
+  document.getElementById('modalFrase').textContent = frase;
+  document.getElementById('modalOverlay').classList.add('show');
+  mostraClassifica('freq');
   avviaFuochi();
 }
 
-const spinBtn = document.getElementById('spinBtn');
-
-function giraRuota() {
-  if (spinning) return;
-  spinning = true;
-  spinBtn.disabled = true;
-
-  const box = document.getElementById('resultBox');
-  box.classList.remove('highlight');
-
-  const giriExtra = 5 + Math.random() * 5;
-  const angoloFinale = giriExtra * 2 * Math.PI + Math.random() * 2 * Math.PI;
-  const durata = 4000 + Math.random() * 2000;
-  const start = performance.now();
-  const angoloIniziale = angoloCorrente;
-
-  function anima(now) {
-    const elapsed = now - start;
-    const progress = Math.min(elapsed / durata, 1);
-    const eased = 1 - Math.pow(1 - progress, 3);
-    angoloCorrente = angoloIniziale + angoloFinale * eased;
-    disegnaRuota();
-    if (progress < 1) {
-      requestAnimationFrame(anima);
-    } else {
-      angoloCorrente = angoloIniziale + angoloFinale;
-      disegnaRuota();
-      const indice = getIndiceVincente();
-      mostraRisultato(indice);
-      spinning = false;
-      spinBtn.disabled = false;
-    }
+// ---- SPIN LOGIC ----
+function onClickSpin() {
+  const nome = playerNameInput.value.trim();
+  if (!nome && stato === Stato.FERMO) {
+    playerNameInput.focus();
+    playerNameInput.style.borderColor = '#d63031';
+    setTimeout(() => playerNameInput.style.borderColor = '#e17055', 1500);
+    return;
   }
-  requestAnimationFrame(anima);
+
+  if (stato === Stato.FERMO) {
+    stato = Stato.GIRA;
+    spinBtn.textContent = '✋ FERMA!';
+    spinBtn.classList.add('ferma');
+    resultBox.innerHTML = '<span class="result-label">🌀 Ruota in corsa... premi FERMA per fermarla!</span>';
+    resultBox.classList.remove('highlight');
+  } else if (stato === Stato.GIRA) {
+    stato = Stato.FERMA;
+    spinBtn.disabled = true;
+    spinBtn.textContent = '⏳...';
+    const giriExtra = 2 + Math.random() * 4;
+    targetAngolo = angolo + giriExtra * 2 * Math.PI + Math.random() * 2 * Math.PI;
+    angoloPartenza = angolo;
+    progressoDecel = 0;
+  }
 }
 
-spinBtn.addEventListener('click', giraRuota);
+spinBtn.addEventListener('click', onClickSpin);
 
 document.getElementById('modalBtn').addEventListener('click', function() {
   document.getElementById('modalOverlay').classList.remove('show');
@@ -370,6 +618,41 @@ document.getElementById('modalBtn').addEventListener('click', function() {
 document.getElementById('modalOverlay').addEventListener('click', function(e) {
   if (e.target === this) this.classList.remove('show');
 });
+
+// ---- ANIMAZIONE PRINCIPALE ----
+let lastTime = 0;
+
+function animaRuota(time) {
+  if (!lastTime) lastTime = time;
+  const dt = Math.min(time - lastTime, 50);
+  lastTime = time;
+
+  if (stato === Stato.GIRA) {
+    angolo += VEL_SPIN * dt * 0.06;
+  } else if (stato === Stato.FERMA) {
+    progressoDecel += dt / 3000;
+    if (progressoDecel >= 1) {
+      progressoDecel = 1;
+      angolo = targetAngolo;
+      disegnaRuota();
+      const indice = getIndiceVincente();
+      stato = Stato.FERMO;
+      spinBtn.textContent = '🎡 GIRA LA RUOTA!';
+      spinBtn.classList.remove('ferma');
+      spinBtn.disabled = false;
+      mostraRisultato(indice);
+      requestAnimationFrame(animaRuota);
+      return;
+    }
+    const eased = 1 - Math.pow(1 - progressoDecel, 3);
+    angolo = angoloPartenza + (targetAngolo - angoloPartenza) * eased;
+  }
+
+  disegnaRuota();
+  requestAnimationFrame(animaRuota);
+}
+
+requestAnimationFrame(animaRuota);
 
 // ---- FUOCHI D'ARTIFICIO ----
 const fwCanvas = document.getElementById('fireworks');
@@ -473,8 +756,6 @@ function loopFuochi() {
   requestAnimationFrame(loopFuochi);
 }
 loopFuochi();
-
-disegnaRuota();
 </script>
 </body>
 </html>
