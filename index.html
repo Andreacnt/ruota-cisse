@@ -295,6 +295,7 @@ canvas#fireworks {
 .modal-emoji { font-size: 4rem; margin-bottom: 10px; animation: bounce 1s infinite; }
 .modal-title { font-family: 'Luckiest Guy', cursive; font-size: 1.8rem; color: #d63031; margin-bottom: 15px; }
 .modal-frase { font-family: 'Fredoka One', cursive; font-size: 1.6rem; color: #2d3436; padding: 15px 10px; background: rgba(255,255,255,0.7); border-radius: 16px; margin-bottom: 20px; line-height: 1.4; }
+.modal-gif { max-width: 100%; border-radius: 12px; margin-bottom: 15px; display: none; }
 .modal-btn {
   font-family: 'Luckiest Guy', cursive;
   font-size: 1.3rem;
@@ -359,6 +360,7 @@ canvas#fireworks {
   <div class="modal-content">
     <div class="modal-emoji">🎯</div>
     <div class="modal-title">Oggi Cissè farà questo:</div>
+    <img class="modal-gif" id="modalGif" src="https://media1.tenor.com/m/9xx5jJaHPpIAAAAC/fat-guy.gif" alt="dancing">
     <div class="modal-frase" id="modalFrase"></div>
     <button class="modal-btn" id="modalBtn">🔄 GIRA ANCORA!</button>
   </div>
@@ -581,6 +583,8 @@ function mostraRisultato(indice) {
     </div>`;
   resultBox.classList.add('highlight');
   document.getElementById('modalFrase').textContent = frase;
+  const gif = document.getElementById('modalGif');
+  gif.style.display = frase === "Faccio quello che mi piace" ? 'block' : 'none';
   document.getElementById('modalOverlay').classList.add('show');
   mostraClassifica('freq');
   avviaFuochi();
