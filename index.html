@@ -166,7 +166,6 @@ canvas#wheel {
   color: #888;
   margin-top: 4px;
 }
-/* LEGEND */
 .legend {
   background: rgba(255,255,255,0.85);
   border-radius: 16px;
@@ -214,7 +213,6 @@ canvas#wheel {
   flex: 1;
   line-height: 1.2;
 }
-/* CLASSIFICA */
 .classifica-wrap {
   width: 100%;
   max-width: 520px;
@@ -363,15 +361,14 @@ canvas#fireworks {
 @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
 @media (max-width: 500px) {
   h1 { font-size: 1.8rem; }
-  .wheel-container, canvas#wheel { width: 300px; height: 300px; }
-  .btn-spin { font-size: 1.3rem; padding: 12px 30px; }
-  .result-text { font-size: 1.1rem; }
-  .classifica-wrap h2 { font-size: 1.2rem; }
+.wheel-container, canvas#wheel { width: 300px; height: 300px; }
+.btn-spin { font-size: 1.3rem; padding: 12px 30px; }
+.result-text { font-size: 1.1rem; }
+.classifica-wrap h2 { font-size: 1.2rem; }
 }
 </style>
 </head>
 <body>
-
 <h1>Cosa farà Cissè oggi al lavoro?</h1>
 <p class="subtitle">⚡ La ruota del destino lavorativo ⚡</p>
 
@@ -421,7 +418,6 @@ canvas#fireworks {
 <canvas id="fireworks"></canvas>
 
 <script>
-// ---- CONFIGURAZIONE ----
 const frasi = [
   "Bloccare la serratura",
   "Guardare un film",
@@ -448,11 +444,11 @@ const colori = [
 
 const STORAGE_KEY = 'ruota-cisse-storico';
 const API_URL = 'https://script.google.com/macros/s/AKfycbwlmb6-I-knS8VpwaBgZcD1LkzPySz4u-of_l_tdl8IRP4c8pxeNT4oc_kqDRURAze1/exec';
+
 const N = frasi.length;
 const arco = (2 * Math.PI) / N;
 const VEL_SPIN = 0.18;
 
-// ---- STATO ----
 const Stato = { FERMO: 0, GIRA: 1, FERMA: 2 };
 let stato = Stato.FERMO;
 let angolo = 0;
@@ -460,7 +456,6 @@ let targetAngolo = 0;
 let angoloPartenza = 0;
 let progressoDecel = 0;
 
-// ---- DOM ----
 const canvas = document.getElementById('wheel');
 const ctx = canvas.getContext('2d');
 const spinBtn = document.getElementById('spinBtn');
@@ -469,17 +464,14 @@ const playerNameInput = document.getElementById('playerName');
 const nameList = document.getElementById('nameList');
 const classificaBody = document.getElementById('classificaBody');
 
-// ---- STORAGE ----
 function getStorico() {
   try {
     return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
   } catch { return []; }
 }
-
 function salvaStorico(data) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
-
 async function aggiornaDaServer() {
   try {
     const res = await fetch(API_URL);
@@ -494,32 +486,40 @@ async function aggiornaDaServer() {
     }
   } catch {}
 }
-
 function aggiungiLancio(nome, frase) {
   navigator.sendBeacon(API_URL, new URLSearchParams({ nome, frase }));
   const storico = getStorico();
   storico.unshift({ nome, frase, data: new Date().toISOString() });
   salvaStorico(storico);
 }
-
 function aggiornaNameList() {
   const storico = getStorico();
   const nomi = [...new Set(storico.map(s => s.nome))];
   nameList.innerHTML = nomi.map(n => `<option value="${n}">`).join('');
 }
-aggiornaNameList();
 
-// ---- DISEGNO RUOTA ----
+async function initClassifica() {
+  await aggiornaDaServer();
+  aggiornaNameList();
+  mostraClassifica('freq');
+}
+initClassifica();
+
+setInterval(async () => {
+  await aggiornaDaServer();
+  aggiornaNameList();
+  const tabAttivo = document.querySelector('.classifica-tabs button.attivo').dataset.tab;
+  mostraClassifica(tabAttivo);
+}, 15000);
+
 function disegnaRuota() {
   const cx = canvas.width / 2;
   const cy = canvas.height / 2;
   const r = canvas.width / 2 - 10;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-
   for (let i = 0; i < N; i++) {
     const start = angolo + i * arco;
     const end = start + arco;
-
     ctx.beginPath();
     ctx.moveTo(cx, cy);
     ctx.arc(cx, cy, r, start, end);
@@ -529,12 +529,10 @@ function disegnaRuota() {
     ctx.strokeStyle = '#fff';
     ctx.lineWidth = 2;
     ctx.stroke();
-
     const angoloTesto = start + arco / 2;
     ctx.save();
     ctx.translate(cx, cy);
     ctx.rotate(angoloTesto);
-
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.font = 'bold 26px Arial';
@@ -543,10 +541,8 @@ function disegnaRuota() {
     ctx.fillStyle = '#fff';
     ctx.fillText(i + 1, r * 0.55, 0);
     ctx.shadowBlur = 0;
-
     ctx.restore();
   }
-
   ctx.beginPath();
   ctx.arc(cx, cy, 18, 0, 2 * Math.PI);
   ctx.fillStyle = '#fff';
@@ -562,24 +558,22 @@ function getIndiceVincente() {
   return Math.floor(a / arco) % N;
 }
 
-// ---- LEGENDA ----
 function buildLegend() {
   const el = document.getElementById('legend');
   let html = '<div class="legend-title">📋 Legenda</div><div class="legend-grid">';
   for (let i = 0; i < N; i++) {
     html += `
-      <div class="legend-item">
-        <span class="legend-color" style="background:${colori[i]}"></span>
-        <span class="legend-num">${i+1}</span>
-        <span class="legend-text">${frasi[i]}</span>
-      </div>`;
+<div class="legend-item">
+<span class="legend-color" style="background:${colori[i]}"></span>
+<span class="legend-num">${i+1}</span>
+<span class="legend-text">${frasi[i]}</span>
+</div>`;
   }
   html += '</div>';
   el.innerHTML = html;
 }
 buildLegend();
 
-// ---- CLASSIFICA ----
 function isOggi(dataISO) {
   const oggi = new Date();
   const d = new Date(dataISO);
@@ -594,6 +588,7 @@ function mostraClassifica(tab) {
     `📅 ${oggi.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}`;
 
   const storico = getStorico().filter(s => isOggi(s.data));
+
   if (storico.length === 0) {
     classificaBody.innerHTML = '<div class="classifica-vuota">Ancora nessun lancio oggi — sii il primo!</div>';
     return;
@@ -606,7 +601,6 @@ function mostraClassifica(tab) {
     }
     const sorted = Object.entries(conteggi).sort((a, b) => b[1] - a[1]);
     const maxCount = sorted[0][1];
-
     let html = '';
     for (let i = 0; i < sorted.length; i++) {
       const [frase, count] = sorted[i];
@@ -614,12 +608,12 @@ function mostraClassifica(tab) {
       const medaglie = ['🥇', '🥈', '🥉'];
       const pos = i < 3 ? medaglie[i] : `#${i+1}`;
       html += `
-        <div class="voce-classifica">
-          <span class="pos">${pos}</span>
-          <span class="frase">${frase}</span>
-          <span class="count">${count}</span>
-          <div class="bar" style="width:${pct}%"></div>
-        </div>`;
+<div class="voce-classifica">
+<span class="pos">${pos}</span>
+<span class="frase">${frase}</span>
+<span class="count">${count}</span>
+<div class="bar" style="width:${pct}%"></div>
+</div>`;
     }
     classificaBody.innerHTML = html;
   } else {
@@ -629,17 +623,16 @@ function mostraClassifica(tab) {
       const data = new Date(s.data);
       const ora = data.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
       html += `
-        <div class="voce-log">
-          <span class="log-nome">${s.nome}</span>
-          <span class="log-frase">${s.frase}</span>
-          <span class="log-data">${ora}</span>
-        </div>`;
+<div class="voce-log">
+<span class="log-nome">${s.nome}</span>
+<span class="log-frase">${s.frase}</span>
+<span class="log-data">${ora}</span>
+</div>`;
     }
     classificaBody.innerHTML = html;
   }
 }
 
-// ---- TAB CLASSIFICA ----
 document.querySelectorAll('.classifica-tabs button').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.classifica-tabs button').forEach(b => b.classList.remove('attivo'));
@@ -648,18 +641,16 @@ document.querySelectorAll('.classifica-tabs button').forEach(btn => {
   });
 });
 
-// ---- MOSTRA RISULTATO ----
 function mostraRisultato(indice) {
   const nome = playerNameInput.value.trim() || 'Anonimo';
   const frase = frasi[indice];
   aggiungiLancio(nome, frase);
   aggiornaNameList();
-
   resultBox.innerHTML = `
-    <div>
-      <div class="result-text">🎯 Oggi Cissè farà questo: <strong>"${frase}"</strong></div>
-      <div class="result-name">👤 ${nome}</div>
-    </div>`;
+<div>
+<div class="result-text">🎯 Oggi Cissè farà questo: <strong>"${frase}"</strong></div>
+<div class="result-name">👤 ${nome}</div>
+</div>`;
   resultBox.classList.add('highlight');
   document.getElementById('modalFrase').textContent = frase;
   const gif = document.getElementById('modalGif');
@@ -669,7 +660,6 @@ function mostraRisultato(indice) {
   avviaFuochi();
 }
 
-// ---- SPIN LOGIC ----
 function onClickSpin() {
   const raw = playerNameInput.value.trim();
   if (!raw && stato === Stato.FERMO) {
@@ -678,6 +668,7 @@ function onClickSpin() {
     setTimeout(() => playerNameInput.style.borderColor = '#e17055', 1500);
     return;
   }
+
   const nome = raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase();
   playerNameInput.value = nome;
 
@@ -714,13 +705,12 @@ playerNameInput.addEventListener('input', function() {
 document.getElementById('modalBtn').addEventListener('click', function() {
   document.getElementById('modalOverlay').classList.remove('show');
 });
+
 document.getElementById('modalOverlay').addEventListener('click', function(e) {
   if (e.target === this) this.classList.remove('show');
 });
 
-// ---- ANIMAZIONE PRINCIPALE ----
 let lastTime = 0;
-
 function animaRuota(time) {
   if (!lastTime) lastTime = time;
   const dt = Math.min(time - lastTime, 50);
@@ -750,13 +740,10 @@ function animaRuota(time) {
   disegnaRuota();
   requestAnimationFrame(animaRuota);
 }
-
 requestAnimationFrame(animaRuota);
 
-// ---- FUOCHI D'ARTIFICIO ----
 const fwCanvas = document.getElementById('fireworks');
 const fwCtx = fwCanvas.getContext('2d');
-
 function resizeFw() {
   fwCanvas.width = window.innerWidth;
   fwCanvas.height = window.innerHeight;
@@ -781,7 +768,6 @@ class Particella {
     this.decay = 0.008 + Math.random() * 0.015;
     this.trail = [];
   }
-
   update() {
     this.trail.push({ x: this.x, y: this.y, alpha: this.alpha });
     if (this.trail.length > 6) this.trail.shift();
@@ -790,7 +776,6 @@ class Particella {
     this.vy += 0.04;
     this.alpha -= this.decay;
   }
-
   draw(ctx) {
     for (let i = 0; i < this.trail.length; i++) {
       const t = this.trail[i];
