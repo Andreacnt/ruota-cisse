@@ -1069,7 +1069,10 @@ document.getElementById('modalOverlay').addEventListener('click', function(e) {
 // ---- AUDIO ----
 let audioCtx = null;
 let lastTickSeg = -1;
-function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+function initAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+}
 function playTone(freq, dur, vol, type) {
   try {
     initAudio();
@@ -1091,18 +1094,16 @@ function playBark() {
     initAudio();
     for (let i = 0; i < 3; i++) {
       setTimeout(() => {
-        const buf = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.12, audioCtx.sampleRate);
+        const buf = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.15, audioCtx.sampleRate);
         const d = buf.getChannelData(0);
         for (let j = 0; j < d.length; j++) d[j] = (Math.random() * 2 - 1) * Math.pow(1 - j / d.length, 3);
         const src = audioCtx.createBufferSource();
         src.buffer = buf;
-        const f = audioCtx.createBiquadFilter();
-        f.type = 'bandpass'; f.frequency.value = 350; f.Q.value = 1.5;
         const g = audioCtx.createGain();
-        g.gain.value = 0.25;
-        src.connect(f); f.connect(g); g.connect(audioCtx.destination);
-        src.start(); src.stop(audioCtx.currentTime + 0.12);
-      }, i * 120);
+        g.gain.value = 0.45;
+        src.connect(g); g.connect(audioCtx.destination);
+        src.start(); src.stop(audioCtx.currentTime + 0.15);
+      }, i * 130);
     }
   } catch {}
 }
