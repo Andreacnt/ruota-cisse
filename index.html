@@ -1118,7 +1118,7 @@ loopFuochi();
 const gameObjs = ['🔧','⚙️','🪑','🔩','🔨','🤖','🥪','🧰','🛞','🔪'];
 const game = {
   canvas: null, ctx: null, running: false,
-  ahmedX: 0, obstacles: [], score: 0,
+  ahmedX: 0, obstacles: [], score: 0, lives: 3,
   highScore: parseInt(localStorage.getItem('ruota-game-hs')) || 0,
   speed: 1, spawnTimer: 0, spawnInterval: 45, frame: 0,
   touchX: null, animId: null
@@ -1141,7 +1141,7 @@ function resizeGame() {
 
 function startGame() {
   game.running = true;
-  game.obstacles = []; game.score = 0; game.speed = 1;
+  game.lives = 3; game.obstacles = []; game.score = 0; game.speed = 1;
   game.spawnTimer = 0; game.spawnInterval = 45; game.frame = 0;
   game.ahmedX = game.canvas.width / 2;
   game.touchX = null;
@@ -1179,7 +1179,6 @@ function updateGame() {
   game.spawnTimer++;
   if (game.spawnTimer >= game.spawnInterval) {
     game.spawnTimer = 0;
-    game.spawnInterval = Math.max(18, 45 - Math.floor(game.score / 3));
     game.obstacles.push({
       x: 20 + Math.random() * (c.width - 40),
       y: -40, emoji: gameObjs[Math.floor(Math.random() * gameObjs.length)],
@@ -1190,10 +1189,23 @@ function updateGame() {
     const o = game.obstacles[i]; o.y += o.speed;
     const dx = o.x - game.ahmedX;
     const dy = o.y - (c.height - 65);
-    if (Math.hypot(dx, dy) < 25) { gameOver(); return; }
+    if (Math.hypot(dx, dy) < 25) {
+      game.obstacles.splice(i, 1);
+      if (o.emoji === '🥪') {
+        game.lives = Math.min(5, game.lives + 1);
+      } else {
+        game.lives--;
+        if (game.lives <= 0) { gameOver(); return; }
+      }
+      continue;
+    }
     if (o.y > c.height + 40) game.obstacles.splice(i, 1);
   }
-  if (game.frame % 60 === 0) { game.score++; game.speed = 1 + game.score * 0.025; }
+  if (game.frame % 60 === 0) {
+    game.score++;
+    game.speed = 1 + game.score * 0.025;
+    game.spawnInterval = Math.max(12, 45 - Math.floor(game.score * 1.2));
+  }
 }
 
 function drawGame() {
@@ -1228,13 +1240,16 @@ function drawGame() {
   ctx.font = '10px Arial';
   ctx.fillStyle = '#ff6b6b';
   ctx.fillText('Cissè', c.width / 2, 54);
-  ctx.font = 'bold 20px Arial';
-  ctx.fillStyle = '#fff';
+  const cuori = '❤️'.repeat(game.lives) + '🖤'.repeat(Math.max(0, 5 - game.lives));
+  ctx.font = '18px Arial';
   ctx.textAlign = 'left';
-  ctx.fillText('⏱ ' + game.score + 's', 12, 22);
+  ctx.fillText(cuori, 12, 22);
   ctx.textAlign = 'right';
+  ctx.fillStyle = '#fff';
+  ctx.fillText('⏱ ' + game.score + 's', c.width - 12, 22);
   ctx.fillStyle = '#fdcb6e';
-  ctx.fillText('🏆 ' + game.highScore + 's', c.width - 12, 22);
+  ctx.font = '13px Arial';
+  ctx.fillText('🏆 ' + game.highScore + 's', c.width - 12, 38);
   if (game.score < 3) {
     ctx.font = '15px Arial';
     ctx.fillStyle = 'rgba(255,255,255,0.5)';
