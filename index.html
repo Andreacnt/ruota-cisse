@@ -1157,7 +1157,7 @@ function toggleGame() {
   c.classList.toggle('show', show);
   t.classList.toggle('attivo', show);
   t.textContent = show ? '🎡 TORNA ALLA RUOTA' : '🎮 SALVA AHMED!';
-  if (show) { initGame(); startGame(); }
+  if (show) { initGame(); startGame(); setTimeout(() => c.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100); }
   else { game.running = false; if (game.animId) cancelAnimationFrame(game.animId); }
 }
 
@@ -1219,7 +1219,7 @@ function drawGame() {
   ctx.font = '42px Arial';
   const ahmedY = c.height - 65;
   game.ahmedX += Math.sin(game.frame * 0.08) * 0.3;
-  ctx.fillText('👨‍🦱', game.ahmedX, ahmedY);
+  ctx.fillText('👨🏾‍🔧', game.ahmedX, ahmedY);
   ctx.font = '11px Arial';
   ctx.fillStyle = '#fff';
   ctx.fillText('Ahmed', game.ahmedX, ahmedY + 30);
