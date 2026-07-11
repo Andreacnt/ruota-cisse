@@ -33,6 +33,28 @@ h1 {
   opacity: 0.8;
   text-align: center;
 }
+.saturday-banner {
+  display: none;
+  background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+  color: #fff;
+  padding: 14px 20px;
+  border-radius: 20px;
+  text-align: center;
+  font-size: 1.05rem;
+  margin-bottom: 15px;
+  box-shadow: 0 4px 15px rgba(108,92,231,0.3);
+  animation: satPulse 2s infinite;
+  max-width: 520px;
+  width: 100%;
+  line-height: 1.5;
+}
+@keyframes satPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.03)} }
+.result-box.pargo { animation: pargoFlash 0.5s infinite alternate; }
+@keyframes pargoFlash { from{box-shadow:0 0 20px rgba(214,48,49,0.6)} to{box-shadow:0 0 60px rgba(214,48,49,1)} }
+.sirena-flash {
+  animation: sirenaFlash 0.3s 6 alternate;
+}
+@keyframes sirenaFlash { from{box-shadow:0 0 0 0 rgba(214,48,49,0)} to{box-shadow:0 0 0 12px rgba(214,48,49,0.8)} }
 .player-input {
   display: flex;
   align-items: center;
@@ -491,6 +513,8 @@ canvas#fireworks {
 <h1>Cosa farà Cissè oggi al lavoro?</h1>
 <p class="subtitle">⚡ La ruota del destino lavorativo ⚡</p>
 
+<div id="saturdayBanner" class="saturday-banner">🛌 Oggi è sabato — a Cissè non piace lavorare di sabato! 🛌</div>
+
 <div class="player-input">
   <label>👤 Nome:</label>
   <input type="text" id="playerName" placeholder="Chi sei?" list="nameList" autocomplete="off">
@@ -507,6 +531,8 @@ canvas#fireworks {
 
 <button class="btn-spin" id="spinBtn">🎡 GIRA LA RUOTA!</button>
 <p style="font-size:0.85rem;color:#6c3a1e;opacity:0.7;margin-top:-10px;margin-bottom:15px;text-align:center;">Premi una volta per far girare — premi di nuovo per fermare</p>
+
+<p style="font-size:0.75rem;color:#c0392b;opacity:0.55;margin-top:-10px;margin-bottom:12px;text-align:center;">🔊 Attenzione: il sito contiene suoni — se hai il volume al massimo abbassa o metti muto 🔊</p>
 
 <button id="gameToggle">🎮 SALVA AHMED!</button>
 
@@ -532,6 +558,7 @@ canvas#fireworks {
     <div id="gameOverlay">
       <div class="go-title">💀 CISSÈ HA PRESO AHMED!</div>
       <div class="go-score">⏱ <span id="gameFinalScore">0</span> secondi</div>
+      <div class="go-newrecord" id="goNewRecord" style="display:none;color:#fdcb6e;font-size:1rem;">🏆 NUOVO RECORD!</div>
       <div class="go-high">🏆 Record: <span id="gameFinalHigh">0</span>s</div>
       <button class="go-btn go-btn-retry" id="gameRetry">🔄 ANCORA!</button>
       <button class="go-btn go-btn-exit" id="gameExit">🚪 TORNA ALLA RUOTA</button>
@@ -655,10 +682,16 @@ function aggiornaNameList() {
   nameList.innerHTML = nomi.map(n => `<option value="${n}">`).join('');
 }
 
+function mostraSabato() {
+  const banner = document.getElementById('saturdayBanner');
+  banner.style.display = new Date().getDay() === 6 ? 'block' : 'none';
+}
+
 async function initClassifica() {
   await aggiornaDaServer();
   aggiornaNameList();
   mostraClassifica('freq');
+  mostraSabato();
 }
 initClassifica();
 
@@ -828,6 +861,11 @@ const gifFrasiAhmed = {
 
 function mostraRisultato(indice) {
   if (wheelMode === 'main' && frasi[indice] === "Caccia ad Ahmed") {
+    playSiren();
+    const wc = document.querySelector('.wheel-container');
+    wc.classList.add('sirena-flash');
+    setTimeout(() => wc.classList.remove('sirena-flash'), 2000);
+    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
     iniziaCacciaAhmed();
     return;
   }
@@ -846,6 +884,8 @@ function mostraRisultato(indice) {
   if (isPargo) {
     document.querySelector('.modal-emoji').textContent = '🐕💢';
     document.querySelector('.modal-title').textContent = 'CISSÈ È ARRABBIATO!';
+    playBark();
+    if (navigator.vibrate) navigator.vibrate(300);
   } else {
     document.querySelector('.modal-emoji').textContent = wheelMode === 'ahmed' ? '😈' : '🎯';
     document.querySelector('.modal-title').textContent = wheelMode === 'ahmed' ? 'Cissè farà questo ad Ahmed:' : 'Oggi Cissè farà questo:';
@@ -857,6 +897,7 @@ function mostraRisultato(indice) {
 <div class="result-name">👤 ${nome}</div>
 </div>`;
   resultBox.classList.add('highlight');
+  resultBox.classList.toggle('pargo', isPargo);
   document.getElementById('modalFrase').textContent = frase;
   const gif = document.getElementById('modalGif');
   if (isPargo) {
@@ -877,6 +918,7 @@ function mostraRisultato(indice) {
 }
 
 let modalAction = 'close';
+let dopoBoss = false;
 
 function iniziaCacciaAhmed() {
   modalAction = 'scopri';
@@ -964,6 +1006,14 @@ playerNameInput.addEventListener('input', function() {
 
 document.getElementById('modalBtn').addEventListener('click', function() {
   document.getElementById('modalOverlay').classList.remove('show');
+  if (dopoBoss) {
+    dopoBoss = false;
+    document.querySelector('.modal-emoji').textContent = '🎯';
+    document.querySelector('.modal-title').textContent = 'Oggi Cissè farà questo:';
+    document.getElementById('modalBtn').textContent = '🔄 GIRA ANCORA!';
+    document.getElementById('gameOverlay').classList.add('show');
+    return;
+  }
   if (modalAction === 'scopri') {
     modalAction = 'close';
     document.querySelector('.modal-emoji').textContent = '🎯';
@@ -978,6 +1028,14 @@ document.getElementById('modalBtn').addEventListener('click', function() {
 document.getElementById('modalOverlay').addEventListener('click', function(e) {
   if (e.target === this) {
     this.classList.remove('show');
+    if (dopoBoss) {
+      dopoBoss = false;
+      document.querySelector('.modal-emoji').textContent = '🎯';
+      document.querySelector('.modal-title').textContent = 'Oggi Cissè farà questo:';
+      document.getElementById('modalBtn').textContent = '🔄 GIRA ANCORA!';
+      document.getElementById('gameOverlay').classList.add('show');
+      return;
+    }
     if (modalAction === 'scopri') {
       modalAction = 'close';
       document.querySelector('.modal-emoji').textContent = '🎯';
@@ -1010,6 +1068,45 @@ function playTone(freq, dur, vol, type) {
 function playTick() { playTone(800 + Math.random()*200, 0.05, 0.06, 'square'); }
 function playDing() { playTone(523, 0.15, 0.1); setTimeout(() => playTone(659, 0.15, 0.1), 100); setTimeout(() => playTone(784, 0.3, 0.12), 200); }
 function playClick() { playTone(440, 0.08, 0.08, 'square'); }
+function playBark() {
+  try {
+    initAudio();
+    for (let i = 0; i < 3; i++) {
+      setTimeout(() => {
+        const buf = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.12, audioCtx.sampleRate);
+        const d = buf.getChannelData(0);
+        for (let j = 0; j < d.length; j++) d[j] = (Math.random() * 2 - 1) * Math.pow(1 - j / d.length, 3);
+        const src = audioCtx.createBufferSource();
+        src.buffer = buf;
+        const f = audioCtx.createBiquadFilter();
+        f.type = 'bandpass'; f.frequency.value = 350; f.Q.value = 1.5;
+        const g = audioCtx.createGain();
+        g.gain.value = 0.25;
+        src.connect(f); f.connect(g); g.connect(audioCtx.destination);
+        src.start(); src.stop(audioCtx.currentTime + 0.12);
+      }, i * 120);
+    }
+  } catch {}
+}
+function playSiren() {
+  try {
+    initAudio();
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = 'sawtooth'; g.gain.value = 0.06;
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start();
+    const t0 = audioCtx.currentTime;
+    const sweep = () => {
+      const t = audioCtx.currentTime - t0;
+      if (t < 0.8) { o.frequency.value = 300 + Math.sin(t * 24) * 150; requestAnimationFrame(sweep); }
+      else o.stop();
+    }; sweep();
+  } catch {}
+}
+function playGameHit() { playTone(200, 0.15, 0.1, 'square'); }
+function playGameHeal() { playTone(700, 0.1, 0.08); }
+function playGameOverTone() { playTone(120, 0.6, 0.12, 'sawtooth'); }
 
 let lastTime = 0;
 function animaRuota(time) {
@@ -1038,6 +1135,7 @@ function animaRuota(time) {
       }
       spinBtn.disabled = false;
       playDing();
+      if (navigator.vibrate) navigator.vibrate(50);
       mostraRisultato(indice);
       requestAnimationFrame(animaRuota);
       return;
@@ -1152,6 +1250,21 @@ function loopFuochi() {
 }
 loopFuochi();
 
+function mostraBossFinale() {
+  dopoBoss = true;
+  document.querySelector('.modal-emoji').textContent = '🎉🏆🎉';
+  document.querySelector('.modal-title').textContent = 'AHMED È SALVO!';
+  document.getElementById('modalFrase').textContent = '🎊 CISSÈ HA SALVATO AHMED 5 VOLTE! TUTTI I COLLEGHI FESTEGGIANO! 🎊';
+  document.getElementById('modalGif').src = 'https://media2.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif';
+  document.getElementById('modalGif').style.display = 'block';
+  document.getElementById('modalBtn').textContent = '🎉 EVVIVA!';
+  modalAction = 'close';
+  document.getElementById('modalOverlay').classList.add('show');
+  if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 400]);
+  avviaFuochi();
+  for (let i = 0; i < 5; i++) setTimeout(playDing, i * 300);
+}
+
 // ---- GIOCO: SALVA AHMED! ----
 const gameObjs = ['🔧','⚙️','🪑','🔩','🔨','🤖','🥪','🧰','🛞','🔪'];
 const game = {
@@ -1231,8 +1344,11 @@ function updateGame() {
       game.obstacles.splice(i, 1);
       if (o.emoji === '🥪') {
         game.lives = Math.min(5, game.lives + 1);
+        playGameHeal();
       } else {
         game.lives--;
+        playGameHit();
+        if (navigator.vibrate) navigator.vibrate(50);
         if (game.lives <= 0) { gameOver(); return; }
       }
       continue;
@@ -1300,15 +1416,32 @@ function drawGame() {
   }
 }
 
+const GAME_SAVE_KEY = 'ruota-game-salvataggi';
+
 function gameOver() {
   game.running = false;
+  if (navigator.vibrate) navigator.vibrate([100, 50, 200]);
+  playGameOverTone();
   if (game.animId) cancelAnimationFrame(game.animId);
+  let nuovoRecord = false;
   if (game.score > game.highScore) {
     game.highScore = game.score;
     localStorage.setItem('ruota-game-hs', game.highScore);
+    nuovoRecord = true;
+  }
+  if (game.score >= 10) {
+    const salvati = parseInt(localStorage.getItem(GAME_SAVE_KEY)) || 0;
+    const nuovo = salvati + 1;
+    localStorage.setItem(GAME_SAVE_KEY, nuovo);
+    if (nuovo >= 5) {
+      mostraBossFinale();
+      localStorage.setItem(GAME_SAVE_KEY, 0);
+      return;
+    }
   }
   document.getElementById('gameFinalScore').textContent = game.score;
   document.getElementById('gameFinalHigh').textContent = game.highScore;
+  document.getElementById('goNewRecord').style.display = nuovoRecord ? 'block' : 'none';
   document.getElementById('gameOverlay').classList.add('show');
   drawGame();
   const ctx = game.ctx; const c = game.canvas;
