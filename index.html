@@ -833,26 +833,39 @@ function mostraRisultato(indice) {
   }
   modalAction = 'close';
   const nome = wheelMode === 'main' ? (playerNameInput.value.trim() || 'Anonimo') : 'Cissè';
-  const frase = frasi[indice];
+  let frase = frasi[indice];
+  if (wheelMode === 'main' && (nome === 'Cissè' || nome === 'Cisse')) {
+    frase = 'PORGO CANE!!!!';
+  }
   if (wheelMode === 'main') aggiungiLancio(nome, frase);
   aggiornaNameList();
-  document.querySelector('.modal-emoji').textContent = wheelMode === 'ahmed' ? '😈' : '🎯';
-  document.querySelector('.modal-title').textContent = wheelMode === 'ahmed' ? 'Cissè farà questo ad Ahmed:' : 'Oggi Cissè farà questo:';
+  if (frase === 'PORGO CANE!!!!') {
+    document.querySelector('.modal-emoji').textContent = '🐕💢';
+    document.querySelector('.modal-title').textContent = 'CISSÈ È ARRABBIATO!';
+  } else {
+    document.querySelector('.modal-emoji').textContent = wheelMode === 'ahmed' ? '😈' : '🎯';
+    document.querySelector('.modal-title').textContent = wheelMode === 'ahmed' ? 'Cissè farà questo ad Ahmed:' : 'Oggi Cissè farà questo:';
+  }
   document.getElementById('modalBtn').textContent = '🔄 GIRA ANCORA!';
   resultBox.innerHTML = `
 <div>
-<div class="result-text">🎯 ${wheelMode === 'ahmed' ? 'Cissè farà questo ad Ahmed:' : 'Oggi Cissè farà questo:'} <strong>"${frase}"</strong></div>
+<div class="result-text">🎯 ${frase === 'PORGO CANE!!!!' ? '😡 CISSÈ GRIDA:' : (wheelMode === 'ahmed' ? 'Cissè farà questo ad Ahmed:' : 'Oggi Cissè farà questo:')} <strong>"${frase}"</strong></div>
 <div class="result-name">👤 ${nome}</div>
 </div>`;
   resultBox.classList.add('highlight');
   document.getElementById('modalFrase').textContent = frase;
   const gif = document.getElementById('modalGif');
-  const mappa = wheelMode === 'main' ? gifFrasiMain : gifFrasiAhmed;
-  if (mappa[indice]) {
-    gif.src = mappa[indice];
+  if (frase === 'PORGO CANE!!!!') {
+    gif.src = 'https://media0.giphy.com/media/rmeOE3w52T7BQ8A16v/giphy.gif';
     gif.style.display = 'block';
   } else {
-    gif.style.display = 'none';
+    const mappa = wheelMode === 'main' ? gifFrasiMain : gifFrasiAhmed;
+    if (mappa[indice]) {
+      gif.src = mappa[indice];
+      gif.style.display = 'block';
+    } else {
+      gif.style.display = 'none';
+    }
   }
   document.getElementById('modalOverlay').classList.add('show');
   mostraClassifica('freq');
