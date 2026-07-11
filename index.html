@@ -366,6 +366,104 @@ canvas#fireworks {
 .result-text { font-size: 1.1rem; }
 .classifica-wrap h2 { font-size: 1.2rem; }
 }
+
+/* GAME */
+#gameToggle {
+  display: block;
+  margin: 0 auto 15px;
+  font-family: 'Luckiest Guy', cursive;
+  font-size: 1.4rem;
+  padding: 12px 30px;
+  background: linear-gradient(135deg, #2d3436, #636e72);
+  color: #fff;
+  border: none;
+  border-radius: 60px;
+  cursor: pointer;
+  box-shadow: 0 5px 0 #1a1e20, 0 6px 16px rgba(0,0,0,0.25);
+  transition: all 0.08s linear;
+  letter-spacing: 1px;
+}
+#gameToggle:active { transform: translateY(5px); box-shadow: 0 1px 0 #1a1e20; }
+#gameToggle.attivo { background: linear-gradient(135deg, #d63031, #e17055); box-shadow: 0 5px 0 #a02828; }
+
+#gameContainer {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 520px;
+  margin-bottom: 20px;
+}
+#gameContainer.show { display: flex; }
+#gameCanvas {
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  touch-action: none;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+.game-hint {
+  font-size: 0.8rem;
+  color: #6c3a1e;
+  opacity: 0.7;
+  text-align: center;
+  margin-bottom: 5px;
+}
+#gameOverlay {
+  display: none;
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.75);
+  border-radius: 16px;
+  z-index: 10;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+#gameOverlay.show { display: flex; }
+#gameOverlay .go-title {
+  font-family: 'Luckiest Guy', cursive;
+  font-size: 1.6rem;
+  color: #d63031;
+  text-shadow: 2px 2px 0 #fdcb6e;
+}
+#gameOverlay .go-score {
+  font-size: 1.1rem;
+  color: #fff;
+}
+#gameOverlay .go-high {
+  font-size: 0.9rem;
+  color: #fdcb6e;
+}
+#gameOverlay .go-btn {
+  font-family: 'Luckiest Guy', cursive;
+  font-size: 1.2rem;
+  padding: 10px 28px;
+  border: none;
+  border-radius: 40px;
+  cursor: pointer;
+  transition: all 0.08s linear;
+}
+#gameOverlay .go-btn:active { transform: translateY(3px); }
+.go-btn-retry {
+  background: linear-gradient(135deg, #d63031, #e17055);
+  color: #fff;
+  box-shadow: 0 4px 0 #a02828;
+}
+.go-btn-exit {
+  background: #636e72;
+  color: #fff;
+  box-shadow: 0 4px 0 #1a1e20;
+}
+#gameContainerWrap {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 15px;
+}
 </style>
 </head>
 <body>
@@ -389,6 +487,8 @@ canvas#fireworks {
 <button class="btn-spin" id="spinBtn">🎡 GIRA LA RUOTA!</button>
 <p style="font-size:0.85rem;color:#6c3a1e;opacity:0.7;margin-top:-10px;margin-bottom:15px;text-align:center;">Premi una volta per far girare — premi di nuovo per fermare</p>
 
+<button id="gameToggle">🎮 SALVA AHMED!</button>
+
 <div class="result-box" id="resultBox">
   <span class="result-label">Premi il pulsante per scoprire il destino di Cissè 🃏</span>
 </div>
@@ -403,6 +503,20 @@ canvas#fireworks {
   <div class="classifica-body" id="classificaBody">
     <div class="classifica-vuota">Ancora nessun lancio — sii il primo!</div>
   </div>
+</div>
+
+<div id="gameContainer">
+  <div id="gameContainerWrap">
+    <canvas id="gameCanvas"></canvas>
+    <div id="gameOverlay">
+      <div class="go-title">💀 CISSÈ HA PRESO AHMED!</div>
+      <div class="go-score">⏱ <span id="gameFinalScore">0</span> secondi</div>
+      <div class="go-high">🏆 Record: <span id="gameFinalHigh">0</span>s</div>
+      <button class="go-btn go-btn-retry" id="gameRetry">🔄 ANCORA!</button>
+      <button class="go-btn go-btn-exit" id="gameExit">🚪 TORNA ALLA RUOTA</button>
+    </div>
+  </div>
+  <p class="game-hint">👆 Tocca a sinistra/destra per muovere Ahmed — schiva gli oggetti di Cissè!</p>
 </div>
 
 <div class="modal-overlay" id="modalOverlay">
@@ -432,14 +546,15 @@ const frasi = [
   "Far schiantare il robot",
   "Faccio quello che mi piace",
   "Rubare la merenda ad Ahmed",
-  "Canticchiare canzoni napoletane"
+  "Canticchiare canzoni napoletane",
+  "Dire che sono il miglior saldatore"
 ];
 
 const colori = [
   "#e74c3c", "#f39c12", "#2ecc71", "#3498db", "#9b59b6",
   "#1abc9c", "#e67e22", "#00bcd4", "#ff6b81",
   "#a29bfe", "#fd79a8", "#00cec9",
-  "#fdcb6e", "#6c5ce7"
+  "#fdcb6e", "#6c5ce7", "#e84393"
 ];
 
 const STORAGE_KEY = 'ruota-cisse-storico';
@@ -641,6 +756,24 @@ document.querySelectorAll('.classifica-tabs button').forEach(btn => {
   });
 });
 
+const gifFrasi = {
+  0: 'https://media1.giphy.com/media/ILASt5sFFRCPNjf8WI/giphy.gif',
+  1: 'https://media0.giphy.com/media/hvWAXnhZKjnLdZj20P/giphy.gif',
+  2: 'https://media4.giphy.com/media/dJVBCPzpaCBCknenuz/giphy.gif',
+  3: 'https://media1.giphy.com/media/cag1zDdXOx1UmX2PY7/giphy.gif',
+  4: 'https://media2.giphy.com/media/RptFzXohn1ck2nKaNa/giphy.gif',
+  5: 'https://media4.giphy.com/media/IfS7dr23vPKX6/giphy.gif',
+  6: 'https://media2.giphy.com/media/kWgExtT1JQE0qeFbOx/giphy.gif',
+  7: 'https://media2.giphy.com/media/Q1aRmd8e90WIw/giphy.gif',
+  8: 'https://media4.giphy.com/media/ceHKRKMR6Ojao/giphy.gif',
+  9: 'https://media0.giphy.com/media/idhqsPtYPk0uv7tNbv/giphy.gif',
+  10: 'https://media3.giphy.com/media/bCCnBFuk2JCkJcGwif/giphy.gif',
+  11: 'https://media1.tenor.com/m/9xx5jJaHPpIAAAAC/fat-guy.gif',
+  12: 'https://media3.giphy.com/media/l44QjgeQ5ium91n9K/giphy.gif',
+  13: 'https://media0.giphy.com/media/iQtDbO4c8ggJhYofMU/giphy.gif',
+  14: 'https://media2.giphy.com/media/l2JegIreAqtWzkX6g/giphy.gif'
+};
+
 function mostraRisultato(indice) {
   const nome = playerNameInput.value.trim() || 'Anonimo';
   const frase = frasi[indice];
@@ -654,7 +787,12 @@ function mostraRisultato(indice) {
   resultBox.classList.add('highlight');
   document.getElementById('modalFrase').textContent = frase;
   const gif = document.getElementById('modalGif');
-  gif.style.display = frase === "Faccio quello che mi piace" ? 'block' : 'none';
+  if (gifFrasi[indice]) {
+    gif.src = gifFrasi[indice];
+    gif.style.display = 'block';
+  } else {
+    gif.style.display = 'none';
+  }
   document.getElementById('modalOverlay').classList.add('show');
   mostraClassifica('freq');
   avviaFuochi();
@@ -840,6 +978,186 @@ function loopFuochi() {
   requestAnimationFrame(loopFuochi);
 }
 loopFuochi();
+
+// ---- GIOCO: SALVA AHMED! ----
+const gameObjs = ['🔧','⚙️','🪑','🔩','🔨','🤖','🥪','🧰','🛞','🔪'];
+const game = {
+  canvas: null, ctx: null, running: false,
+  ahmedX: 0, obstacles: [], score: 0,
+  highScore: parseInt(localStorage.getItem('ruota-game-hs')) || 0,
+  speed: 1, spawnTimer: 0, spawnInterval: 45, frame: 0,
+  touchX: null, animId: null
+};
+
+function initGame() {
+  game.canvas = document.getElementById('gameCanvas');
+  game.ctx = game.canvas.getContext('2d');
+  resizeGame();
+  setupGameControls();
+}
+
+function resizeGame() {
+  const c = game.canvas;
+  const maxW = Math.min(window.innerWidth - 20, 420);
+  c.width = maxW; c.height = maxW * 1.4;
+  c.style.width = maxW + 'px'; c.style.height = (maxW * 1.4) + 'px';
+  game.ahmedX = c.width / 2;
+}
+
+function startGame() {
+  game.running = true;
+  game.obstacles = []; game.score = 0; game.speed = 1;
+  game.spawnTimer = 0; game.spawnInterval = 45; game.frame = 0;
+  game.ahmedX = game.canvas.width / 2;
+  game.touchX = null;
+  document.getElementById('gameOverlay').classList.remove('show');
+  if (game.animId) cancelAnimationFrame(game.animId);
+  game.animId = requestAnimationFrame(gameLoop);
+}
+
+function toggleGame() {
+  const c = document.getElementById('gameContainer');
+  const t = document.getElementById('gameToggle');
+  const show = !c.classList.contains('show');
+  c.classList.toggle('show', show);
+  t.classList.toggle('attivo', show);
+  t.textContent = show ? '🎡 TORNA ALLA RUOTA' : '🎮 SALVA AHMED!';
+  if (show) { initGame(); startGame(); }
+  else { game.running = false; if (game.animId) cancelAnimationFrame(game.animId); }
+}
+
+function gameLoop() {
+  if (!game.running) return;
+  game.frame++;
+  updateGame();
+  drawGame();
+  game.animId = requestAnimationFrame(gameLoop);
+}
+
+function updateGame() {
+  const c = game.canvas;
+  if (game.touchX !== null) {
+    const s = 4 + game.speed * 0.3;
+    if (game.touchX < c.width / 2) game.ahmedX = Math.max(20, game.ahmedX - s);
+    else game.ahmedX = Math.min(c.width - 20, game.ahmedX + s);
+  }
+  game.spawnTimer++;
+  if (game.spawnTimer >= game.spawnInterval) {
+    game.spawnTimer = 0;
+    game.spawnInterval = Math.max(18, 45 - Math.floor(game.score / 3));
+    game.obstacles.push({
+      x: 20 + Math.random() * (c.width - 40),
+      y: -40, emoji: gameObjs[Math.floor(Math.random() * gameObjs.length)],
+      speed: 1.8 + game.speed * 0.4
+    });
+  }
+  for (let i = game.obstacles.length - 1; i >= 0; i--) {
+    const o = game.obstacles[i]; o.y += o.speed;
+    const dx = o.x - game.ahmedX;
+    const dy = o.y - (c.height - 65);
+    if (Math.hypot(dx, dy) < 25) { gameOver(); return; }
+    if (o.y > c.height + 40) game.obstacles.splice(i, 1);
+  }
+  if (game.frame % 60 === 0) { game.score++; game.speed = 1 + game.score * 0.025; }
+}
+
+function drawGame() {
+  const c = game.canvas, ctx = game.ctx;
+  ctx.fillStyle = '#3d3d3d';
+  ctx.fillRect(0, 0, c.width, c.height);
+  ctx.strokeStyle = '#4a4a4a';
+  ctx.lineWidth = 1;
+  for (let y = 0; y < c.height; y += 28) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(c.width, y); ctx.stroke(); }
+  for (let x = 0; x < c.width; x += 28) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, c.height); ctx.stroke(); }
+  ctx.fillStyle = '#5c3a1e';
+  ctx.fillRect(0, c.height - 16, c.width, 16);
+  ctx.fillStyle = '#7a4e2e';
+  ctx.fillRect(0, c.height - 18, c.width, 4);
+  for (let x = 20; x < c.width; x += 60) {
+    ctx.fillStyle = '#6b4423';
+    ctx.fillRect(x, c.height - 16, 30, 10);
+  }
+  ctx.font = '34px Arial';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  for (const o of game.obstacles) ctx.fillText(o.emoji, o.x, o.y);
+  ctx.font = '42px Arial';
+  const ahmedY = c.height - 65;
+  game.ahmedX += Math.sin(game.frame * 0.08) * 0.3;
+  ctx.fillText('👨‍🦱', game.ahmedX, ahmedY);
+  ctx.font = '11px Arial';
+  ctx.fillStyle = '#fff';
+  ctx.fillText('Ahmed', game.ahmedX, ahmedY + 30);
+  ctx.font = '36px Arial';
+  ctx.fillText('😈', c.width / 2, 32);
+  ctx.font = '10px Arial';
+  ctx.fillStyle = '#ff6b6b';
+  ctx.fillText('Cissè', c.width / 2, 54);
+  ctx.font = 'bold 20px Arial';
+  ctx.fillStyle = '#fff';
+  ctx.textAlign = 'left';
+  ctx.fillText('⏱ ' + game.score + 's', 12, 22);
+  ctx.textAlign = 'right';
+  ctx.fillStyle = '#fdcb6e';
+  ctx.fillText('🏆 ' + game.highScore + 's', c.width - 12, 22);
+  if (game.score < 3) {
+    ctx.font = '15px Arial';
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.textAlign = 'center';
+    ctx.fillText('👆 Tocca a sinistra/destra', c.width / 2, c.height / 2 - 10);
+    ctx.fillText('per muovere Ahmed!', c.width / 2, c.height / 2 + 14);
+  }
+}
+
+function gameOver() {
+  game.running = false;
+  if (game.animId) cancelAnimationFrame(game.animId);
+  if (game.score > game.highScore) {
+    game.highScore = game.score;
+    localStorage.setItem('ruota-game-hs', game.highScore);
+  }
+  document.getElementById('gameFinalScore').textContent = game.score;
+  document.getElementById('gameFinalHigh').textContent = game.highScore;
+  document.getElementById('gameOverlay').classList.add('show');
+  drawGame();
+  const ctx = game.ctx; const c = game.canvas;
+  ctx.fillStyle = 'rgba(214,48,49,0.85)';
+  ctx.beginPath(); ctx.arc(game.ahmedX, c.height - 65, 28, 0, Math.PI * 2); ctx.fill();
+  ctx.font = '32px Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText('💥', game.ahmedX, c.height - 65);
+}
+
+function setupGameControls() {
+  const c = game.canvas;
+  function onTouch(e) {
+    e.preventDefault();
+    const t = e.touches[0];
+    const r = c.getBoundingClientRect();
+    game.touchX = t.clientX - r.left;
+  }
+  c.addEventListener('touchstart', onTouch, { passive: false });
+  c.addEventListener('touchmove', onTouch, { passive: false });
+  c.addEventListener('touchend', () => { game.touchX = null; });
+  c.addEventListener('touchcancel', () => { game.touchX = null; });
+  c.addEventListener('mousedown', e => {
+    const r = c.getBoundingClientRect();
+    game.touchX = e.clientX - r.left;
+  });
+  c.addEventListener('mousemove', e => {
+    if (game.touchX !== null) {
+      const r = c.getBoundingClientRect();
+      game.touchX = e.clientX - r.left;
+    }
+  });
+  c.addEventListener('mouseup', () => { game.touchX = null; });
+  c.addEventListener('mouseleave', () => { game.touchX = null; });
+}
+
+document.getElementById('gameToggle').addEventListener('click', toggleGame);
+document.getElementById('gameRetry').addEventListener('click', startGame);
+document.getElementById('gameExit').addEventListener('click', toggleGame);
+window.addEventListener('resize', () => { if (game.canvas) resizeGame(); });
 </script>
 </body>
 </html>
