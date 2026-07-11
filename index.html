@@ -934,12 +934,14 @@ function onClickSpin() {
   playerNameInput.value = nome;
 
   if (stato === Stato.FERMO) {
+    playClick();
     stato = Stato.GIRA;
     spinBtn.textContent = '✋ FERMA!';
     spinBtn.classList.add('ferma');
     resultBox.innerHTML = '<span class="result-label">🌀 Ruota in corsa... premi FERMA per fermarla!</span>';
     resultBox.classList.remove('highlight');
   } else if (stato === Stato.GIRA) {
+    playClick();
     stato = Stato.FERMA;
     spinBtn.disabled = true;
     spinBtn.textContent = '⏳...';
@@ -991,6 +993,27 @@ document.getElementById('modalOverlay').addEventListener('click', function(e) {
   }
 });
 
+// ---- AUDIO ----
+let audioCtx = null;
+let lastTickSeg = -1;
+function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+function playTone(freq, dur, vol, type) {
+  try {
+    initAudio();
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = type || 'sine';
+    o.frequency.value = freq;
+    g.gain.value = vol || 0.1;
+    g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(); o.stop(audioCtx.currentTime + dur);
+  } catch {}
+}
+function playTick() { playTone(800 + Math.random()*200, 0.05, 0.06, 'square'); }
+function playDing() { playTone(523, 0.15, 0.1); setTimeout(() => playTone(659, 0.15, 0.1), 100); setTimeout(() => playTone(784, 0.3, 0.12), 200); }
+function playClick() { playTone(440, 0.08, 0.08, 'square'); }
+
 let lastTime = 0;
 function animaRuota(time) {
   if (!lastTime) lastTime = time;
@@ -999,6 +1022,8 @@ function animaRuota(time) {
 
   if (stato === Stato.GIRA) {
     angolo += VEL_SPIN * dt * 0.06;
+    const seg = getIndiceVincente();
+    if (seg !== lastTickSeg) { lastTickSeg = seg; playTick(); }
   } else if (stato === Stato.FERMA) {
     progressoDecel += dt / 3000;
     if (progressoDecel >= 1) {
@@ -1015,12 +1040,15 @@ function animaRuota(time) {
         return;
       }
       spinBtn.disabled = false;
+      playDing();
       mostraRisultato(indice);
       requestAnimationFrame(animaRuota);
       return;
     }
     const eased = 1 - Math.pow(1 - progressoDecel, 3);
     angolo = angoloPartenza + (targetAngolo - angoloPartenza) * eased;
+    const seg = getIndiceVincente();
+    if (seg !== lastTickSeg) { lastTickSeg = seg; playTick(); }
   }
 
   disegnaRuota();
