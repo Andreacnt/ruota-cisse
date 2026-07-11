@@ -834,12 +834,16 @@ function mostraRisultato(indice) {
   modalAction = 'close';
   const nome = wheelMode === 'main' ? (playerNameInput.value.trim() || 'Anonimo') : 'Cissè';
   let frase = frasi[indice];
+  if (wheelMode === 'main' && nome === 'Anonimo') {
+    frase = 'PORGO CANE NON HAI INSERITO IL NOME';
+  }
   if (wheelMode === 'main' && (nome === 'Cissè' || nome === 'Cisse')) {
     frase = 'PORGO CANE!!!!';
   }
   if (wheelMode === 'main') aggiungiLancio(nome, frase);
   aggiornaNameList();
-  if (frase === 'PORGO CANE!!!!') {
+  const isPargo = frase.startsWith('PORGO CANE');
+  if (isPargo) {
     document.querySelector('.modal-emoji').textContent = '🐕💢';
     document.querySelector('.modal-title').textContent = 'CISSÈ È ARRABBIATO!';
   } else {
@@ -849,13 +853,13 @@ function mostraRisultato(indice) {
   document.getElementById('modalBtn').textContent = '🔄 GIRA ANCORA!';
   resultBox.innerHTML = `
 <div>
-<div class="result-text">🎯 ${frase === 'PORGO CANE!!!!' ? '😡 CISSÈ GRIDA:' : (wheelMode === 'ahmed' ? 'Cissè farà questo ad Ahmed:' : 'Oggi Cissè farà questo:')} <strong>"${frase}"</strong></div>
+<div class="result-text">🎯 ${isPargo ? '😡 CISSÈ GRIDA:' : (wheelMode === 'ahmed' ? 'Cissè farà questo ad Ahmed:' : 'Oggi Cissè farà questo:')} <strong>"${frase}"</strong></div>
 <div class="result-name">👤 ${nome}</div>
 </div>`;
   resultBox.classList.add('highlight');
   document.getElementById('modalFrase').textContent = frase;
   const gif = document.getElementById('modalGif');
-  if (frase === 'PORGO CANE!!!!') {
+  if (isPargo) {
     gif.src = 'https://media0.giphy.com/media/rmeOE3w52T7BQ8A16v/giphy.gif';
     gif.style.display = 'block';
   } else {
@@ -920,32 +924,11 @@ function resetMainWheel() {
 }
 
 let animIdAhmed = null;
-let noNameCount = 0;
 
 function onClickSpin() {
   const raw = playerNameInput.value.trim();
-  if (!raw && stato === Stato.FERMO) {
-    noNameCount++;
-    if (noNameCount >= 3) {
-      noNameCount = 0;
-      document.querySelector('.modal-emoji').textContent = '🐕💢';
-      document.querySelector('.modal-title').textContent = 'CISSÈ SI ARRABBIA!';
-      document.getElementById('modalFrase').textContent = 'PORGO CANE NON HAI INSERITO IL NOME';
-      document.getElementById('modalGif').src = 'https://media0.giphy.com/media/rmeOE3w52T7BQ8A16v/giphy.gif';
-      document.getElementById('modalGif').style.display = 'block';
-      document.getElementById('modalBtn').textContent = '🔄 OK!';
-      document.getElementById('modalOverlay').classList.add('show');
-      return;
-    }
-    playerNameInput.focus();
-    playerNameInput.style.borderColor = '#d63031';
-    setTimeout(() => playerNameInput.style.borderColor = '#e17055', 1500);
-    return;
-  }
-  noNameCount = 0;
-
-  const nome = raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase();
-  playerNameInput.value = nome;
+  const nome = raw ? raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase() : '';
+  if (nome) playerNameInput.value = nome;
 
   if (stato === Stato.FERMO) {
     playClick();
@@ -969,7 +952,6 @@ function onClickSpin() {
 spinBtn.addEventListener('click', onClickSpin);
 
 playerNameInput.addEventListener('input', function() {
-  noNameCount = 0;
   const start = this.selectionStart;
   const val = this.value;
   if (val.length > 1) {
