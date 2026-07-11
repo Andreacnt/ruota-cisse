@@ -894,8 +894,10 @@ function mostraRisultato(indice) {
   aggiornaNameList();
   const isPargo = frase.startsWith('PORGO CANE');
   if (isSbandi) {
-    document.querySelector('.modal-emoji').textContent = '😭';
-    document.querySelector('.modal-title').textContent = 'SBANDI SI METTE A PIANGERE!';
+    document.querySelector('.modal-emoji').textContent = '😡';
+    document.querySelector('.modal-title').textContent = 'CISSÈ GRIDA:';
+    playBark();
+    if (navigator.vibrate) navigator.vibrate(300);
   } else if (isPargo) {
     document.querySelector('.modal-emoji').textContent = '🐕💢';
     document.querySelector('.modal-title').textContent = 'CISSÈ È ARRABBIATO!';
@@ -908,7 +910,7 @@ function mostraRisultato(indice) {
   document.getElementById('modalBtn').textContent = '🔄 GIRA ANCORA!';
   resultBox.innerHTML = `
 <div>
-<div class="result-text">🎯 ${isSbandi ? '😭 SBANDI GRIDA:' : isPargo ? '😡 CISSÈ GRIDA:' : (wheelMode === 'ahmed' ? 'Cissè farà questo ad Ahmed:' : 'Oggi Cissè farà questo:')} <strong>"${frase}"</strong></div>
+<div class="result-text">🎯 ${isPargo || isSbandi ? '😡 CISSÈ GRIDA:' : (wheelMode === 'ahmed' ? 'Cissè farà questo ad Ahmed:' : 'Oggi Cissè farà questo:')} <strong>"${frase}"</strong></div>
 <div class="result-name">👤 ${nome}</div>
 </div>`;
   resultBox.classList.add('highlight');
@@ -916,7 +918,7 @@ function mostraRisultato(indice) {
   document.getElementById('modalFrase').textContent = frase;
   const gif = document.getElementById('modalGif');
   if (isSbandi) {
-    gif.src = 'https://media0.giphy.com/media/Lny6Rw04k7EandWWBP/giphy.gif';
+    gif.src = gifFrasiMain[2];
     gif.style.display = 'block';
   } else if (isPargo) {
     gif.src = 'https://media0.giphy.com/media/rmeOE3w52T7BQ8A16v/giphy.gif';
