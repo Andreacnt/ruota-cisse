@@ -920,15 +920,29 @@ function resetMainWheel() {
 }
 
 let animIdAhmed = null;
+let noNameCount = 0;
 
 function onClickSpin() {
   const raw = playerNameInput.value.trim();
   if (!raw && stato === Stato.FERMO) {
+    noNameCount++;
+    if (noNameCount >= 3) {
+      noNameCount = 0;
+      document.querySelector('.modal-emoji').textContent = '🐕💢';
+      document.querySelector('.modal-title').textContent = 'CISSÈ SI ARRABBIA!';
+      document.getElementById('modalFrase').textContent = 'PORGO CANE NON HAI INSERITO IL NOME';
+      document.getElementById('modalGif').src = 'https://media0.giphy.com/media/rmeOE3w52T7BQ8A16v/giphy.gif';
+      document.getElementById('modalGif').style.display = 'block';
+      document.getElementById('modalBtn').textContent = '🔄 OK!';
+      document.getElementById('modalOverlay').classList.add('show');
+      return;
+    }
     playerNameInput.focus();
     playerNameInput.style.borderColor = '#d63031';
     setTimeout(() => playerNameInput.style.borderColor = '#e17055', 1500);
     return;
   }
+  noNameCount = 0;
 
   const nome = raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase();
   playerNameInput.value = nome;
@@ -955,6 +969,7 @@ function onClickSpin() {
 spinBtn.addEventListener('click', onClickSpin);
 
 playerNameInput.addEventListener('input', function() {
+  noNameCount = 0;
   const start = this.selectionStart;
   const val = this.value;
   if (val.length > 1) {
