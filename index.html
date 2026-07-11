@@ -878,10 +878,17 @@ function mostraRisultato(indice) {
   if (wheelMode === 'main' && (nome === 'Cissè' || nome === 'Cisse')) {
     frase = 'PORGO CANE!!!!';
   }
+  const isSbandi = wheelMode === 'main' && frase === "Prendere di mira Sbandi";
+  if (isSbandi) {
+    frase = 'PORGO CANE TI FACCIO RAPPORTO !!!';
+  }
   if (wheelMode === 'main') aggiungiLancio(nome, frase);
   aggiornaNameList();
   const isPargo = frase.startsWith('PORGO CANE');
-  if (isPargo) {
+  if (isSbandi) {
+    document.querySelector('.modal-emoji').textContent = '😭';
+    document.querySelector('.modal-title').textContent = 'SBANDI SI METTE A PIANGERE!';
+  } else if (isPargo) {
     document.querySelector('.modal-emoji').textContent = '🐕💢';
     document.querySelector('.modal-title').textContent = 'CISSÈ È ARRABBIATO!';
     playBark();
@@ -893,14 +900,17 @@ function mostraRisultato(indice) {
   document.getElementById('modalBtn').textContent = '🔄 GIRA ANCORA!';
   resultBox.innerHTML = `
 <div>
-<div class="result-text">🎯 ${isPargo ? '😡 CISSÈ GRIDA:' : (wheelMode === 'ahmed' ? 'Cissè farà questo ad Ahmed:' : 'Oggi Cissè farà questo:')} <strong>"${frase}"</strong></div>
+<div class="result-text">🎯 ${isSbandi ? '😭 SBANDI GRIDA:' : isPargo ? '😡 CISSÈ GRIDA:' : (wheelMode === 'ahmed' ? 'Cissè farà questo ad Ahmed:' : 'Oggi Cissè farà questo:')} <strong>"${frase}"</strong></div>
 <div class="result-name">👤 ${nome}</div>
 </div>`;
   resultBox.classList.add('highlight');
-  resultBox.classList.toggle('pargo', isPargo);
+  resultBox.classList.toggle('pargo', isPargo || isSbandi);
   document.getElementById('modalFrase').textContent = frase;
   const gif = document.getElementById('modalGif');
-  if (isPargo) {
+  if (isSbandi) {
+    gif.src = 'https://media0.giphy.com/media/Lny6Rw04k7EandWWBP/giphy.gif';
+    gif.style.display = 'block';
+  } else if (isPargo) {
     gif.src = 'https://media0.giphy.com/media/rmeOE3w52T7BQ8A16v/giphy.gif';
     gif.style.display = 'block';
   } else {
@@ -1343,7 +1353,7 @@ function updateGame() {
     if (Math.hypot(dx, dy) < 25) {
       game.obstacles.splice(i, 1);
       if (o.emoji === '🥪') {
-        game.lives = Math.min(5, game.lives + 1);
+        game.lives = Math.min(3, game.lives + 1);
         game.panini++;
         playGameHeal();
         if (game.panini >= 10) { gameOver(); return; }
@@ -1396,7 +1406,7 @@ function drawGame() {
   ctx.font = '10px Arial';
   ctx.fillStyle = '#ff6b6b';
   ctx.fillText('Cissè', c.width / 2, 54);
-  const cuori = '❤️'.repeat(game.lives) + '🖤'.repeat(Math.max(0, 5 - game.lives));
+  const cuori = '❤️'.repeat(game.lives) + '🖤'.repeat(Math.max(0, 3 - game.lives));
   ctx.font = '18px Arial';
   ctx.textAlign = 'left';
   ctx.fillText(cuori, 12, 22);
