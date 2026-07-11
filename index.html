@@ -167,20 +167,9 @@ canvas#wheel {
   margin-top: 4px;
 }
 .legend {
-  background: rgba(255,255,255,0.85);
-  border-radius: 16px;
-  padding: 12px 14px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
   flex: 1;
   min-width: 220px;
   max-width: 320px;
-}
-.legend-title {
-  font-family: 'Luckiest Guy', cursive;
-  font-size: 1rem;
-  color: #d63031;
-  margin-bottom: 8px;
-  text-align: center;
 }
 .legend-grid {
   display: grid;
@@ -213,6 +202,38 @@ canvas#wheel {
   flex: 1;
   line-height: 1.2;
 }
+.legend-wrap {
+  background: rgba(255,255,255,0.85);
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  flex: 1;
+  min-width: 220px;
+  max-width: 320px;
+  overflow: hidden;
+}
+.legend-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-family: 'Luckiest Guy', cursive;
+  font-size: 1rem;
+  color: #d63031;
+  user-select: none;
+  transition: background 0.2s;
+}
+.legend-header:hover { background: rgba(0,0,0,0.04); }
+.legend-header .arrow { transition: transform 0.3s; font-size: 0.8rem; }
+.legend-header .arrow.open { transform: rotate(180deg); }
+.legend-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease;
+  padding: 0 14px;
+}
+.legend-body.open { max-height: 800px; padding: 0 14px 12px; }
 .classifica-wrap {
   width: 100%;
   max-width: 520px;
@@ -532,37 +553,58 @@ canvas#fireworks {
 <canvas id="fireworks"></canvas>
 
 <script>
-const frasi = [
+const frasiMain = [
   "Bloccare la serratura",
   "Guardare un film",
   "Prendere di mira Sbandi",
   "Disegnare sul tavolo",
   "Ascoltare la musica",
-  "Rubare lo sgabello ad Ahmed",
   "Fare una videochiamata",
   "Fare ragionamenti sulla vita in bagno",
   "Organizzare un attentato terroristico in francese",
   "Far passare il muletto dalla porta",
   "Far schiantare il robot",
   "Faccio quello che mi piace",
-  "Rubare la merenda ad Ahmed",
   "Canticchiare canzoni napoletane",
+  "Caccia ad Ahmed",
   "Dire che sono il miglior saldatore"
 ];
 
-const colori = [
+const coloriMain = [
   "#e74c3c", "#f39c12", "#2ecc71", "#3498db", "#9b59b6",
-  "#1abc9c", "#e67e22", "#00bcd4", "#ff6b81",
+  "#e67e22", "#00bcd4", "#ff6b81",
   "#a29bfe", "#fd79a8", "#00cec9",
-  "#fdcb6e", "#6c5ce7", "#e84393"
+  "#6c5ce7", "#1abc9c", "#e84393"
 ];
+
+const frasiAhmed = [
+  "Inseguire Ahmed con il muletto",
+  "Nascondergli gli attrezzi",
+  "Rubargli il telefono per guardare TikTok",
+  "Occupargli la sua postazione"
+];
+
+const coloriAhmed = ["#d63031", "#e17055", "#fdcb6e", "#00b894"];
+
+let wheelMode = 'main';
+let frasi = frasiMain;
+let colori = coloriMain;
+let N = frasi.length;
+let arco = (2 * Math.PI) / N;
+const VEL_SPIN = 0.18;
+let isAutoSpin = false;
+
+function switchWheelMode(mode) {
+  wheelMode = mode;
+  frasi = mode === 'main' ? frasiMain : frasiAhmed;
+  colori = mode === 'main' ? coloriMain : coloriAhmed;
+  N = frasi.length;
+  arco = (2 * Math.PI) / N;
+  if (mode === 'main') { buildLegend(); }
+}
 
 const STORAGE_KEY = 'ruota-cisse-storico';
 const API_URL = 'https://script.google.com/macros/s/AKfycbwlmb6-I-knS8VpwaBgZcD1LkzPySz4u-of_l_tdl8IRP4c8pxeNT4oc_kqDRURAze1/exec';
-
-const N = frasi.length;
-const arco = (2 * Math.PI) / N;
-const VEL_SPIN = 0.18;
 
 const Stato = { FERMO: 0, GIRA: 1, FERMA: 2 };
 let stato = Stato.FERMO;
@@ -675,7 +717,7 @@ function getIndiceVincente() {
 
 function buildLegend() {
   const el = document.getElementById('legend');
-  let html = '<div class="legend-title">📋 Legenda</div><div class="legend-grid">';
+  let html = '<div class="legend-wrap"><div class="legend-header" id="legendToggle">📋 Legenda <span class="arrow" id="legendArrow">▼</span></div><div class="legend-body" id="legendBody"><div class="legend-grid">';
   for (let i = 0; i < N; i++) {
     html += `
 <div class="legend-item">
@@ -684,8 +726,12 @@ function buildLegend() {
 <span class="legend-text">${frasi[i]}</span>
 </div>`;
   }
-  html += '</div>';
+  html += '</div></div></div>';
   el.innerHTML = html;
+  document.getElementById('legendToggle').addEventListener('click', () => {
+    document.getElementById('legendBody').classList.toggle('open');
+    document.getElementById('legendArrow').classList.toggle('open');
+  });
 }
 buildLegend();
 
@@ -756,47 +802,111 @@ document.querySelectorAll('.classifica-tabs button').forEach(btn => {
   });
 });
 
-const gifFrasi = {
+const gifFrasiMain = {
   0: 'https://media1.giphy.com/media/ILASt5sFFRCPNjf8WI/giphy.gif',
   1: 'https://media0.giphy.com/media/hvWAXnhZKjnLdZj20P/giphy.gif',
   2: 'https://media4.giphy.com/media/dJVBCPzpaCBCknenuz/giphy.gif',
   3: 'https://media1.giphy.com/media/cag1zDdXOx1UmX2PY7/giphy.gif',
   4: 'https://media2.giphy.com/media/RptFzXohn1ck2nKaNa/giphy.gif',
-  5: 'https://media4.giphy.com/media/IfS7dr23vPKX6/giphy.gif',
-  6: 'https://media2.giphy.com/media/kWgExtT1JQE0qeFbOx/giphy.gif',
-  7: 'https://media2.giphy.com/media/Q1aRmd8e90WIw/giphy.gif',
-  8: 'https://media4.giphy.com/media/ceHKRKMR6Ojao/giphy.gif',
-  9: 'https://media0.giphy.com/media/idhqsPtYPk0uv7tNbv/giphy.gif',
-  10: 'https://media3.giphy.com/media/bCCnBFuk2JCkJcGwif/giphy.gif',
-  11: 'https://media1.tenor.com/m/9xx5jJaHPpIAAAAC/fat-guy.gif',
-  12: 'https://media3.giphy.com/media/l44QjgeQ5ium91n9K/giphy.gif',
-  13: 'https://media0.giphy.com/media/iQtDbO4c8ggJhYofMU/giphy.gif',
-  14: 'https://media2.giphy.com/media/l2JegIreAqtWzkX6g/giphy.gif'
+  5: 'https://media2.giphy.com/media/kWgExtT1JQE0qeFbOx/giphy.gif',
+  6: 'https://media2.giphy.com/media/Q1aRmd8e90WIw/giphy.gif',
+  7: 'https://media4.giphy.com/media/ceHKRKMR6Ojao/giphy.gif',
+  8: 'https://media0.giphy.com/media/idhqsPtYPk0uv7tNbv/giphy.gif',
+  9: 'https://media3.giphy.com/media/bCCnBFuk2JCkJcGwif/giphy.gif',
+  10: 'https://media1.tenor.com/m/9xx5jJaHPpIAAAAC/fat-guy.gif',
+  11: 'https://media0.giphy.com/media/iQtDbO4c8ggJhYofMU/giphy.gif',
+  12: 'https://media3.giphy.com/media/3o7btQwS2TVDLoIGxW/giphy.gif',
+  13: 'https://media2.giphy.com/media/l2JegIreAqtWzkX6g/giphy.gif'
+};
+
+const gifFrasiAhmed = {
+  0: 'https://media4.giphy.com/media/3o7btQwS2TVDLoIGxW/giphy.gif',
+  1: 'https://media2.giphy.com/media/lJNo7GJAB0wmQ/giphy.gif',
+  2: 'https://media0.giphy.com/media/26uf7pzFgMvN5Xw2Q/giphy.gif',
+  3: 'https://media0.giphy.com/media/3o7btQwS2TVDLoIGxW/giphy.gif'
 };
 
 function mostraRisultato(indice) {
-  const nome = playerNameInput.value.trim() || 'Anonimo';
+  if (wheelMode === 'main' && frasi[indice] === "Caccia ad Ahmed") {
+    iniziaCacciaAhmed();
+    return;
+  }
+  modalAction = 'close';
+  const nome = wheelMode === 'main' ? (playerNameInput.value.trim() || 'Anonimo') : 'Cissè';
   const frase = frasi[indice];
-  aggiungiLancio(nome, frase);
+  if (wheelMode === 'main') aggiungiLancio(nome, frase);
   aggiornaNameList();
+  document.querySelector('.modal-emoji').textContent = wheelMode === 'ahmed' ? '😈' : '🎯';
+  document.querySelector('.modal-title').textContent = wheelMode === 'ahmed' ? 'Cissè farà questo ad Ahmed:' : 'Oggi Cissè farà questo:';
+  document.getElementById('modalBtn').textContent = '🔄 GIRA ANCORA!';
   resultBox.innerHTML = `
 <div>
-<div class="result-text">🎯 Oggi Cissè farà questo: <strong>"${frase}"</strong></div>
+<div class="result-text">🎯 ${wheelMode === 'ahmed' ? 'Cissè farà questo ad Ahmed:' : 'Oggi Cissè farà questo:'} <strong>"${frase}"</strong></div>
 <div class="result-name">👤 ${nome}</div>
 </div>`;
   resultBox.classList.add('highlight');
   document.getElementById('modalFrase').textContent = frase;
   const gif = document.getElementById('modalGif');
-  if (gifFrasi[indice]) {
-    gif.src = gifFrasi[indice];
+  const mappa = wheelMode === 'main' ? gifFrasiMain : gifFrasiAhmed;
+  if (mappa[indice]) {
+    gif.src = mappa[indice];
     gif.style.display = 'block';
   } else {
     gif.style.display = 'none';
   }
   document.getElementById('modalOverlay').classList.add('show');
   mostraClassifica('freq');
-  avviaFuochi();
+  if (wheelMode === 'main') avviaFuochi();
 }
+
+let modalAction = 'close';
+
+function iniziaCacciaAhmed() {
+  modalAction = 'scopri';
+  document.querySelector('.modal-emoji').textContent = '😈';
+  document.querySelector('.modal-title').textContent = 'OH NO! CISSÈ HA PRESO DI MIRA AHMED!';
+  document.getElementById('modalFrase').textContent = 'Scopri cosa succederà dopo...';
+  document.getElementById('modalGif').style.display = 'none';
+  document.getElementById('modalBtn').textContent = '🔍 SCOPRI!';
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function avviaAutoSpinAhmed() {
+  isAutoSpin = true;
+  switchWheelMode('ahmed');
+  angolo = 0;
+  angoloPartenza = 0;
+  const giri = 5 + Math.random() * 3;
+  targetAngolo = giri * 2 * Math.PI + Math.random() * 2 * Math.PI;
+  progressoDecel = 0;
+  stato = Stato.FERMA;
+  spinBtn.disabled = true;
+  spinBtn.textContent = '🎯 Caccia ad Ahmed...';
+  resultBox.innerHTML = '<span class="result-label">😈 Cissè sta decidendo il destino di Ahmed...</span>';
+  resultBox.classList.remove('highlight');
+  if (animIdAhmed) cancelAnimationFrame(animIdAhmed);
+}
+
+function fineAutoSpinAhmed(indice) {
+  isAutoSpin = false;
+  stato = Stato.FERMO;
+  spinBtn.disabled = false;
+  spinBtn.textContent = '🎡 GIRA LA RUOTA!';
+  mostraRisultato(indice);
+}
+
+function resetMainWheel() {
+  modalAction = 'close';
+  switchWheelMode('main');
+  angolo = 0;
+  disegnaRuota();
+  buildLegend();
+  document.querySelector('.modal-emoji').textContent = '🎯';
+  document.querySelector('.modal-title').textContent = 'Oggi Cissè farà questo:';
+  document.getElementById('modalBtn').textContent = '🔄 GIRA ANCORA!';
+}
+
+let animIdAhmed = null;
 
 function onClickSpin() {
   const raw = playerNameInput.value.trim();
@@ -842,10 +952,30 @@ playerNameInput.addEventListener('input', function() {
 
 document.getElementById('modalBtn').addEventListener('click', function() {
   document.getElementById('modalOverlay').classList.remove('show');
+  if (modalAction === 'scopri') {
+    modalAction = 'close';
+    document.querySelector('.modal-emoji').textContent = '🎯';
+    document.querySelector('.modal-title').textContent = 'Oggi Cissè farà questo:';
+    document.getElementById('modalBtn').textContent = '🔄 GIRA ANCORA!';
+    avviaAutoSpinAhmed();
+  } else if (wheelMode === 'ahmed') {
+    resetMainWheel();
+  }
 });
 
 document.getElementById('modalOverlay').addEventListener('click', function(e) {
-  if (e.target === this) this.classList.remove('show');
+  if (e.target === this) {
+    this.classList.remove('show');
+    if (modalAction === 'scopri') {
+      modalAction = 'close';
+      document.querySelector('.modal-emoji').textContent = '🎯';
+      document.querySelector('.modal-title').textContent = 'Oggi Cissè farà questo:';
+      document.getElementById('modalBtn').textContent = '🔄 GIRA ANCORA!';
+      avviaAutoSpinAhmed();
+    } else if (wheelMode === 'ahmed') {
+      resetMainWheel();
+    }
+  }
 });
 
 let lastTime = 0;
@@ -866,6 +996,11 @@ function animaRuota(time) {
       stato = Stato.FERMO;
       spinBtn.textContent = '🎡 GIRA LA RUOTA!';
       spinBtn.classList.remove('ferma');
+      if (isAutoSpin) {
+        fineAutoSpinAhmed(indice);
+        requestAnimationFrame(animaRuota);
+        return;
+      }
       spinBtn.disabled = false;
       mostraRisultato(indice);
       requestAnimationFrame(animaRuota);
