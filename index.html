@@ -1254,7 +1254,7 @@ function mostraBossFinale() {
   dopoBoss = true;
   document.querySelector('.modal-emoji').textContent = '🎉🏆🎉';
   document.querySelector('.modal-title').textContent = 'AHMED È SALVO!';
-  document.getElementById('modalFrase').textContent = '🎊 CISSÈ HA SALVATO AHMED 5 VOLTE! TUTTI I COLLEGHI FESTEGGIANO! 🎊';
+  document.getElementById('modalFrase').textContent = '🎊 Ahmed ha accumulato abbastanza forze da poter sconfiggere Cissè! Tutti i colleghi festeggiano! 🎊';
   document.getElementById('modalGif').src = 'https://media2.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif';
   document.getElementById('modalGif').style.display = 'block';
   document.getElementById('modalBtn').textContent = '🎉 EVVIVA!';
@@ -1269,7 +1269,7 @@ function mostraBossFinale() {
 const gameObjs = ['🔧','⚙️','🪑','🔩','🔨','🤖','🥪','🧰','🛞','🔪'];
 const game = {
   canvas: null, ctx: null, running: false,
-  ahmedX: 0, obstacles: [], score: 0, lives: 3,
+  ahmedX: 0, obstacles: [], score: 0, lives: 3, panini: 0,
   highScore: parseInt(localStorage.getItem('ruota-game-hs')) || 0,
   speed: 1, spawnTimer: 0, spawnInterval: 45, frame: 0,
   touchX: null, animId: null
@@ -1292,7 +1292,7 @@ function resizeGame() {
 
 function startGame() {
   game.running = true;
-  game.lives = 3; game.obstacles = []; game.score = 0; game.speed = 1;
+  game.lives = 3; game.obstacles = []; game.score = 0; game.panini = 0; game.speed = 1;
   game.spawnTimer = 0; game.spawnInterval = 45; game.frame = 0;
   game.ahmedX = game.canvas.width / 2;
   game.touchX = null;
@@ -1344,7 +1344,9 @@ function updateGame() {
       game.obstacles.splice(i, 1);
       if (o.emoji === '🥪') {
         game.lives = Math.min(5, game.lives + 1);
+        game.panini++;
         playGameHeal();
+        if (game.panini >= 10) { gameOver(); return; }
       } else {
         game.lives--;
         playGameHit();
@@ -1401,6 +1403,9 @@ function drawGame() {
   ctx.font = '9px Arial';
   ctx.fillStyle = 'rgba(255,255,255,0.5)';
   ctx.fillText('🥪=❤️', 12, 36);
+  ctx.fillStyle = '#fdcb6e';
+  ctx.font = '10px Arial';
+  ctx.fillText('🥪 ' + game.panini + '/10', 12, 50);
   ctx.textAlign = 'right';
   ctx.fillStyle = '#fff';
   ctx.fillText('⏱ ' + game.score + 's', c.width - 12, 22);
@@ -1416,10 +1421,12 @@ function drawGame() {
   }
 }
 
-const GAME_SAVE_KEY = 'ruota-game-salvataggi';
-
 function gameOver() {
   game.running = false;
+  if (game.panini >= 10) {
+    mostraBossFinale();
+    return;
+  }
   if (navigator.vibrate) navigator.vibrate([100, 50, 200]);
   playGameOverTone();
   if (game.animId) cancelAnimationFrame(game.animId);
@@ -1428,16 +1435,6 @@ function gameOver() {
     game.highScore = game.score;
     localStorage.setItem('ruota-game-hs', game.highScore);
     nuovoRecord = true;
-  }
-  if (game.score >= 10) {
-    const salvati = parseInt(localStorage.getItem(GAME_SAVE_KEY)) || 0;
-    const nuovo = salvati + 1;
-    localStorage.setItem(GAME_SAVE_KEY, nuovo);
-    if (nuovo >= 5) {
-      mostraBossFinale();
-      localStorage.setItem(GAME_SAVE_KEY, 0);
-      return;
-    }
   }
   document.getElementById('gameFinalScore').textContent = game.score;
   document.getElementById('gameFinalHigh').textContent = game.highScore;
